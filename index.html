@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chess Master - Chess.com Neo Edition</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        /* Exact Chess.com Green Board Palette */
+        .square-light {
+            background-color: #eeeed2;
+        }
+        .square-dark {
+            background-color: #769656;
+        }
+
+        /* Move Highlighting */
+        .square-selected {
+            background-color: #baca44 !important;
+        }
+        .square-prev {
+            background-color: rgba(205, 210, 106, 0.82) !important;
+        }
+
+        /* DRAMATIC CHECK WARNING EFFECT */
+        .square-check-glow {
+            background: radial-gradient(ellipse at center, rgba(239, 68, 68, 0.95) 0%, rgba(220, 38, 38, 0.7) 45%, rgba(185, 28, 28, 0.35) 75%, transparent 100%) !important;
+            animation: pulse-check 1.1s infinite alternate cubic-bezier(0.4, 0, 0.6, 1);
+        }
+
+        @keyframes pulse-check {
+            0% {
+                box-shadow: inset 0 0 15px rgba(239, 68, 68, 0.8), 0 0 20px rgba(239, 68, 68, 0.6);
+            }
+            100% {
+                box-shadow: inset 0 0 30px rgba(220, 38, 38, 1), 0 0 32px rgba(239, 68, 68, 0.9);
+            }
+        }
+
+        .king-tremor {
+            animation: king-alert-tremor 0.8s infinite ease-in-out;
+        }
+
+        @keyframes king-alert-tremor {
+            0%, 100% { transform: scale(1.06) rotate(0deg); }
+            20% { transform: scale(1.09) rotate(-3deg); }
+            40% { transform: scale(1.09) rotate(3deg); }
+            60% { transform: scale(1.09) rotate(-2deg); }
+            80% { transform: scale(1.09) rotate(2deg); }
+        }
+
+        /* Chess Piece Styling */
+        .piece-container {
+            width: 90%;
+            height: 90%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: grab;
+            user-select: none;
+            transition: transform 0.14s ease, filter 0.14s ease;
+            z-index: 10;
+        }
+
+        .piece-container:hover {
+            transform: scale(1.06) translateY(-2px);
+            filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.35));
+        }
+
+        .piece-container:active {
+            cursor: grabbing;
+            transform: scale(1.12) translateY(-4px);
+        }
+
+        .piece-svg {
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: visible;
+        }
+
+        /* Hints */
+        .move-hint {
+            position: absolute;
+            width: 32%;
+            height: 32%;
+            border-radius: 50%;
+            background: rgba(30, 41, 59, 0.28);
+            pointer-events: none;
+            z-index: 15;
+            transition: transform 0.2s ease;
+        }
+
+        .capture-hint {
+            position: absolute;
+            width: 86%;
+            height: 86%;
+            border-radius: 50%;
+            border: 6px solid rgba(225, 29, 72, 0.55);
+            background: rgba(225, 29, 72, 0.08);
+            pointer-events: none;
+            z-index: 15;
+            animation: pulse-capture 1.3s infinite alternate;
+        }
+
+        @keyframes pulse-capture {
+            0% { transform: scale(0.96); opacity: 0.7; }
+            100% { transform: scale(1.03); opacity: 1; }
+        }
+
+        /* Coordinates label */
+        .coord-label {
+            position: absolute;
+            font-size: 11px;
+            font-weight: 700;
+            pointer-events: none;
+            user-select: none;
+        }
+
+        #fireworksCanvas {
+            position: fixed;
+            inset: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 90;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 5px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #334155;
+            border-radius: 9999px;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-[#12161a] via-[#1a2026] to-[#0f1216] text-slate-100 min-h-screen flex flex-col font-['Plus_Jakarta_Sans',sans-serif] selection:bg-emerald-500 selection:text-black relative overflow-x-hidden">
+
+    <!-- Fullscreen Fireworks Canvas -->
+    <canvas id="fireworksCanvas"></canvas>
+
+    <!-- Top Navigation -->
+    <header class="w-full max-w-6xl mx-auto px-4 py-3 flex items-center justify-between border-b border-slate-800/80 backdrop-blur-md">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-[#769656] flex items-center justify-center shadow-lg shadow-emerald-900/30 text-white text-xl font-bold">
+                <i class="fa-solid fa-chess-knight"></i>
+            </div>
+            <div>
+                <h1 class="text-xl md:text-2xl font-black tracking-tight text-white flex items-center gap-2">
+                    Chess Master <span class="text-[10px] uppercase font-bold tracking-wider bg-emerald-500/20 text-emerald-400 px-2.5 py-0.5 rounded-full border border-emerald-500/30">Neo Theme</span>
+                </h1>
+                <p class="text-xs text-slate-400 hidden sm:block">Giao diện xanh chuẩn Chess.com & Bộ quân Neo cao cấp</p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-2.5">
+            <button id="soundToggleBtn" class="p-2.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 transition border border-slate-700/60 shadow-sm" title="Bật/Tắt âm thanh">
+                <i class="fa-solid fa-volume-high text-base text-emerald-400" id="soundIcon"></i>
+            </button>
+            <div class="hidden sm:flex items-center gap-2 text-xs bg-slate-800/90 px-3.5 py-2 rounded-xl border border-slate-700/60 text-slate-300 shadow-sm font-medium">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span>Chess Engine Pro</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Check Alert Floating Banner -->
+    <div id="checkAlertBanner" class="hidden w-full max-w-md mx-auto px-4 mt-2 transition-all duration-300">
+        <div class="bg-rose-600/90 text-white font-extrabold text-sm py-2 px-4 rounded-xl border-2 border-rose-400 flex items-center justify-center gap-2.5 shadow-xl shadow-rose-900/50 animate-bounce">
+            <i class="fa-solid fa-triangle-exclamation text-amber-300 text-lg"></i>
+            <span id="checkAlertText">CẢNH BÁO: VUA ĐANG BỊ CHIẾU!</span>
+        </div>
+    </div>
+
+    <!-- Main Chess Playground Area -->
+    <main class="w-full max-w-6xl mx-auto px-2 sm:px-4 py-3 sm:py-5 flex-1 flex flex-col lg:flex-row items-center lg:items-start justify-center gap-6">
+        
+        <!-- Chess Board Column -->
+        <div class="flex flex-col items-center w-full max-w-[530px]">
+            <!-- Top Player Banner -->
+            <div class="w-full flex items-center justify-between bg-slate-850/90 bg-[#21262d] px-4 py-2.5 rounded-t-2xl border-t border-x border-slate-700/70 shadow-lg">
+                <div class="flex items-center gap-3">
+                    <div id="topPlayerAvatar" class="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center font-bold text-slate-300 border border-slate-600/80 shadow-md">
+                        <i class="fa-solid fa-robot text-lg text-indigo-400" id="topPlayerIcon"></i>
+                    </div>
+                    <div>
+                        <div class="text-sm font-bold flex items-center gap-2 text-slate-100" id="topPlayerName">
+                            AI Bot (Đen)
+                            <span class="text-[10px] px-1.5 py-0.5 bg-slate-700 rounded text-slate-300 font-mono">1550 ELO</span>
+                        </div>
+                        <div class="flex items-center gap-1 min-h-[22px]" id="blackCaptures"></div>
+                    </div>
+                </div>
+                <div id="topPlayerBadge" class="text-xs px-3 py-1 rounded-full font-semibold bg-slate-800 text-slate-400 border border-slate-700">
+                    Chờ đối thủ
+                </div>
+            </div>
+
+            <!-- The Board Box -->
+            <div class="relative w-full aspect-square bg-[#262522] p-2 sm:p-2.5 shadow-2xl border-x border-slate-700/70">
+                <div id="chessboard" class="w-full h-full grid grid-cols-8 grid-rows-8 rounded-sm overflow-hidden border border-black/40 shadow-inner select-none relative">
+                    <!-- 64 chess cells will be generated via JS -->
+                </div>
+            </div>
+
+            <!-- Bottom Player Banner -->
+            <div class="w-full flex items-center justify-between bg-[#21262d] px-4 py-2.5 rounded-b-2xl border-b border-x border-slate-700/70 shadow-lg">
+                <div class="flex items-center gap-3">
+                    <div id="bottomPlayerAvatar" class="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center font-bold text-emerald-400 shadow-md">
+                        <i class="fa-solid fa-user text-lg"></i>
+                    </div>
+                    <div>
+                        <div class="text-sm font-bold flex items-center gap-2 text-slate-100" id="bottomPlayerName">
+                            Bạn (Trắng)
+                            <span class="text-[10px] px-1.5 py-0.5 bg-emerald-500/20 text-emerald-300 rounded border border-emerald-500/30 font-mono">Chủ phòng</span>
+                        </div>
+                        <div class="flex items-center gap-1 min-h-[22px]" id="whiteCaptures"></div>
+                    </div>
+                </div>
+                <div id="bottomPlayerBadge" class="text-xs px-3 py-1 rounded-full font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                    Lượt của bạn
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar / Game Controls -->
+        <div class="w-full max-w-[530px] lg:w-80 flex flex-col gap-4">
+            
+            <!-- Controls Card -->
+            <div class="bg-slate-900/95 backdrop-blur-md rounded-2xl p-4 border border-slate-800 shadow-xl space-y-4">
+                <!-- Mode Selection -->
+                <div>
+                    <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Chế độ chơi</div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button id="modeAiBtn" class="px-3 py-2.5 rounded-xl text-xs sm:text-sm font-bold border border-emerald-500/80 bg-emerald-500/15 text-emerald-300 flex items-center justify-center gap-2 transition shadow-sm">
+                            <i class="fa-solid fa-robot"></i> Đấu Máy (AI)
+                        </button>
+                        <button id="modePassBtn" class="px-3 py-2.5 rounded-xl text-xs sm:text-sm font-bold border border-slate-700 bg-slate-800/60 text-slate-400 hover:bg-slate-800 hover:text-slate-200 flex items-center justify-center gap-2 transition">
+                            <i class="fa-solid fa-user-group"></i> 2 Người
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Turn & Status Banner -->
+                <div id="statusBanner" class="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 flex items-center justify-between">
+                    <span class="text-xs text-slate-400 font-medium">Trạng thái:</span>
+                    <span id="gameStatusText" class="font-bold text-sm text-emerald-400 flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400"></span> Trắng đi
+                    </span>
+                </div>
+
+                <!-- Game Action Buttons -->
+                <div class="grid grid-cols-4 gap-2 pt-1">
+                    <button id="undoBtn" class="py-2.5 px-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold flex flex-col items-center justify-center gap-1.5 transition border border-slate-700 shadow-sm" title="Đi lại 1 nước">
+                        <i class="fa-solid fa-rotate-left text-sm text-amber-400"></i>
+                        <span>Đi lại</span>
+                    </button>
+                    <button id="flipBtn" class="py-2.5 px-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold flex flex-col items-center justify-center gap-1.5 transition border border-slate-700 shadow-sm" title="Đổi chiều bàn cờ">
+                        <i class="fa-solid fa-repeat text-sm text-blue-400"></i>
+                        <span>Xoay bàn</span>
+                    </button>
+                    <button id="resignBtn" class="py-2.5 px-2 rounded-xl bg-slate-800 hover:bg-rose-950/40 text-slate-200 hover:text-rose-300 text-xs font-semibold flex flex-col items-center justify-center gap-1.5 transition border border-slate-700 shadow-sm" title="Chấp nhận đầu hàng">
+                        <i class="fa-solid fa-flag text-sm text-rose-400"></i>
+                        <span>Đầu hàng</span>
+                    </button>
+                    <button id="newGameBtn" class="py-2.5 px-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex flex-col items-center justify-center gap-1.5 transition shadow-lg shadow-emerald-600/30">
+                        <i class="fa-solid fa-plus text-sm"></i>
+                        <span>Ván mới</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Notation & Move History Box -->
+            <div class="bg-slate-900/95 backdrop-blur-md rounded-2xl p-4 border border-slate-800 shadow-xl flex flex-col h-64 sm:h-72">
+                <div class="flex items-center justify-between pb-2.5 border-b border-slate-800">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
+                        <i class="fa-solid fa-scroll text-emerald-400"></i> Biên Bản Nước Đi
+                    </h3>
+                    <span id="moveCountBadge" class="text-[11px] font-mono px-2 py-0.5 bg-slate-850 text-slate-300 rounded-md border border-slate-700">0 nước</span>
+                </div>
+                <div id="moveLogList" class="flex-1 overflow-y-auto space-y-1 pt-2 custom-scrollbar font-mono text-xs">
+                    <div class="text-slate-500 italic text-center py-10">Bàn cờ đã sẵn sàng...</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- VICTORY CELEBRATION MODAL -->
+    <div id="victoryModal" class="hidden fixed inset-0 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 z-[100] transition-all">
+        <div class="bg-gradient-to-b from-slate-900 to-slate-950 border-2 border-emerald-500/70 rounded-3xl p-6 sm:p-8 max-w-md w-full text-center shadow-2xl relative overflow-hidden animate-bounce-short">
+            <div class="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-300 text-slate-950 flex items-center justify-center text-4xl shadow-xl shadow-emerald-500/30 mb-5">
+                <i class="fa-solid fa-trophy" id="victoryTrophyIcon"></i>
+            </div>
+
+            <span class="text-xs uppercase tracking-widest font-extrabold text-emerald-400 bg-emerald-400/10 px-3 py-1 rounded-full border border-emerald-400/30">Kết Thúc Ván Cờ</span>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-white mt-3 mb-2" id="victoryTitle">Bên Trắng Thắng!</h2>
+            <p class="text-slate-300 text-sm mb-6 leading-relaxed" id="victoryDesc">Chiếu bí đối thủ bằng nước đi chính xác tuyệt đối.</p>
+
+            <div class="flex gap-3 justify-center">
+                <button id="modalNewGameBtn" class="flex-1 py-3 px-5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-bold rounded-xl shadow-lg shadow-emerald-500/25 transition">
+                    <i class="fa-solid fa-rotate-right mr-1.5"></i> Ván Mới
+                </button>
+                <button id="closeModalBtn" class="py-3 px-5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-xl transition border border-slate-700">
+                    Xem Lại Bàn
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* ==========================================================
+           1. EXACT CHESS.COM 'NEO' PIECE VECTOR SVG SET
+           Matched perfectly with the reference image
+           ========================================================== */
+        const SVG_PIECES = {
+            // WHITE NEO PIECES (#ffffff body, bold dark #2b2b2b outline)
+            'wP': `<svg class="piece-svg" viewBox="0 0 100 100">
+                <ellipse cx="50" cy="85" rx="27" ry="6" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5"/>
+                <path d="M 33 85 C 33 65, 40 50, 43 45 L 57 45 C 60 50, 67 65, 67 85 Z" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5" stroke-linejoin="round"/>
+                <ellipse cx="50" cy="45" rx="17" ry="5" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5"/>
+                <circle cx="50" cy="27" r="15" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5"/>
+                <ellipse cx="46" cy="23" rx="4" ry="2.5" fill="#ffffff" opacity="0.6"/>
+            </svg>`,
+
+            'wR': `<svg class="piece-svg" viewBox="0 0 100 100">
+                <rect x="20" y="78" width="60" height="13" rx="4" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5"/>
+                <path d="M 27 78 L 31 43 L 69 43 L 73 78 Z" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5" stroke-linejoin="round"/>
+                <rect x="22" y="32" width="56" height="11" rx="2" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5"/>
+                <path d="M 22 32 L 22 17 L 34 17 L 34 25 L 44 25 L 44 17 L 56 17 L 56 25 L 66 25 L 66 17 L 78 17 L 78 32 Z" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5" stroke-linejoin="round"/>
+            </svg>`,
+
+            'wN': `<svg class="piece-svg" viewBox="0 0 100 100">
+                <ellipse cx="50" cy="85" rx="28" ry="6" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5"/>
+                <path d="M 25 85 C 25 76, 23 60, 21 53 C 20 48, 25 45, 30 45 C 33 45, 34 40, 31 34 C 33 30, 38 23, 47 16 C 53 11, 57 14, 57 18 C 65 14, 71 18, 73 24 C 77 34, 78 50, 77 65 C 76 75, 75 80, 75 85 Z" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5" stroke-linejoin="round"/>
+                <circle cx="42" cy="27" r="3.5" fill="#2b2b2b"/>
+                <path d="M 24 53 C 34 56, 42 63, 44 76" fill="none" stroke="#2b2b2b" stroke-width="4" stroke-linecap="round"/>
+            </svg>`,
+
+            'wB': `<svg class="piece-svg" viewBox="0 0 100 100">
+                <ellipse cx="50" cy="85" rx="27" ry="6" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5"/>
+                <path d="M 33 85 C 33 70, 42 63, 43 55 L 57 55 C 58 63, 67 70, 67 85 Z" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5" stroke-linejoin="round"/>
+                <ellipse cx="50" cy="55" rx="16" ry="4.5" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5"/>
+                <path d="M 50 18 C 36 28, 33 46, 50 55 C 67 46, 64 28, 50 18 Z" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5" stroke-linejoin="round"/>
+                <circle cx="50" cy="14" r="4.5" fill="#ffffff" stroke="#2b2b2b" stroke-width="4"/>
+                <path d="M 44 32 L 60 41" fill="none" stroke="#2b2b2b" stroke-width="4" stroke-linecap="round"/>
+            </svg>`,
+
+            'wQ': `<svg class="piece-svg" viewBox="0 0 100 100">
+                <ellipse cx="50" cy="86" rx="29" ry="6" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5"/>
+                <path d="M 28 86 C 30 68, 38 58, 41 52 L 59 52 C 62 58, 70 68, 72 86 Z" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5"/>
+                <ellipse cx="50" cy="52" rx="20" ry="5" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5"/>
+                <path d="M 24 50 L 19 28 L 36 39 L 50 22 L 64 39 L 81 28 L 76 50 Z" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5" stroke-linejoin="round"/>
+                <circle cx="19" cy="24" r="4" fill="#ffffff" stroke="#2b2b2b" stroke-width="3.5"/>
+                <circle cx="50" cy="18" r="4" fill="#ffffff" stroke="#2b2b2b" stroke-width="3.5"/>
+                <circle cx="81" cy="24" r="4" fill="#ffffff" stroke="#2b2b2b" stroke-width="3.5"/>
+            </svg>`,
+
+            'wK': `<svg class="piece-svg" viewBox="0 0 100 100">
+                <ellipse cx="50" cy="86" rx="30" ry="6" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5"/>
+                <path d="M 28 86 C 30 68, 38 58, 41 52 L 59 52 C 62 58, 70 68, 72 86 Z" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5"/>
+                <ellipse cx="50" cy="52" rx="22" ry="5.5" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5"/>
+                <path d="M 26 50 C 24 34, 38 27, 50 27 C 62 27, 76 34, 74 50 Z" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5" stroke-linejoin="round"/>
+                <!-- Cross -->
+                <path d="M 50 10 L 50 23 M 43.5 15 L 56.5 15" fill="none" stroke="#2b2b2b" stroke-width="5" stroke-linecap="square"/>
+            </svg>`,
+
+            // BLACK NEO PIECES (#3d3b37 charcoal body, bold #1e1d1b outline, matching the reference image)
+            'bP': `<svg class="piece-svg" viewBox="0 0 100 100">
+                <ellipse cx="50" cy="85" rx="27" ry="6" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5"/>
+                <path d="M 33 85 C 33 65, 40 50, 43 45 L 57 45 C 60 50, 67 65, 67 85 Z" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5" stroke-linejoin="round"/>
+                <ellipse cx="50" cy="45" rx="17" ry="5" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5"/>
+                <circle cx="50" cy="27" r="15" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5"/>
+                <ellipse cx="46" cy="23" rx="4" ry="2.5" fill="#ffffff" opacity="0.18"/>
+            </svg>`,
+
+            'bR': `<svg class="piece-svg" viewBox="0 0 100 100">
+                <rect x="20" y="78" width="60" height="13" rx="4" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5"/>
+                <path d="M 27 78 L 31 43 L 69 43 L 73 78 Z" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5" stroke-linejoin="round"/>
+                <rect x="22" y="32" width="56" height="11" rx="2" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5"/>
+                <path d="M 22 32 L 22 17 L 34 17 L 34 25 L 44 25 L 44 17 L 56 17 L 56 25 L 66 25 L 66 17 L 78 17 L 78 32 Z" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5" stroke-linejoin="round"/>
+            </svg>`,
+
+            'bN': `<svg class="piece-svg" viewBox="0 0 100 100">
+                <ellipse cx="50" cy="85" rx="28" ry="6" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5"/>
+                <path d="M 25 85 C 25 76, 23 60, 21 53 C 20 48, 25 45, 30 45 C 33 45, 34 40, 31 34 C 33 30, 38 23, 47 16 C 53 11, 57 14, 57 18 C 65 14, 71 18, 73 24 C 77 34, 78 50, 77 65 C 76 75, 75 80, 75 85 Z" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5" stroke-linejoin="round"/>
+                <circle cx="42" cy="27" r="3.5" fill="#f8fafc"/>
+                <path d="M 24 53 C 34 56, 42 63, 44 76" fill="none" stroke="#1e1d1b" stroke-width="4" stroke-linecap="round"/>
+            </svg>`,
+
+            'bB': `<svg class="piece-svg" viewBox="0 0 100 100">
+                <ellipse cx="50" cy="85" rx="27" ry="6" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5"/>
+                <path d="M 33 85 C 33 70, 42 63, 43 55 L 57 55 C 58 63, 67 70, 67 85 Z" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5" stroke-linejoin="round"/>
+                <ellipse cx="50" cy="55" rx="16" ry="4.5" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5"/>
+                <path d="M 50 18 C 36 28, 33 46, 50 55 C 67 46, 64 28, 50 18 Z" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5" stroke-linejoin="round"/>
+                <circle cx="50" cy="14" r="4.5" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4"/>
+                <path d="M 44 32 L 60 41" fill="none" stroke="#f8fafc" stroke-width="4" stroke-linecap="round"/>
+            </svg>`,
+
+            'bQ': `<svg class="piece-svg" viewBox="0 0 100 100">
+                <ellipse cx="50" cy="86" rx="29" ry="6" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5"/>
+                <path d="M 28 86 C 30 68, 38 58, 41 52 L 59 52 C 62 58, 70 68, 72 86 Z" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5"/>
+                <ellipse cx="50" cy="52" rx="20" ry="5" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5"/>
+                <path d="M 24 50 L 19 28 L 36 39 L 50 22 L 64 39 L 81 28 L 76 50 Z" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5" stroke-linejoin="round"/>
+                <circle cx="19" cy="24" r="4" fill="#3d3b37" stroke="#1e1d1b" stroke-width="3.5"/>
+                <circle cx="50" cy="18" r="4" fill="#3d3b37" stroke="#1e1d1b" stroke-width="3.5"/>
+                <circle cx="81" cy="24" r="4" fill="#3d3b37" stroke="#1e1d1b" stroke-width="3.5"/>
+            </svg>`,
+
+            'bK': `<svg class="piece-svg" viewBox="0 0 100 100">
+                <ellipse cx="50" cy="86" rx="30" ry="6" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5"/>
+                <path d="M 28 86 C 30 68, 38 58, 41 52 L 59 52 C 62 58, 70 68, 72 86 Z" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5"/>
+                <ellipse cx="50" cy="52" rx="22" ry="5.5" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5"/>
+                <path d="M 26 50 C 24 34, 38 27, 50 27 C 62 27, 76 34, 74 50 Z" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5" stroke-linejoin="round"/>
+                <!-- Cross -->
+                <path d="M 50 10 L 50 23 M 43.5 15 L 56.5 15" fill="none" stroke="#f8fafc" stroke-width="5" stroke-linecap="square"/>
+            </svg>`
+        };
+
+        const PIECE_VALUES = { 'P': 100, 'N': 320, 'B': 330, 'R': 500, 'Q': 900, 'K': 20000 };
+
+        /* ==========================================================
+           2. WEB AUDIO SYNTHESIZER
+           ========================================================== */
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        let soundEnabled = true;
+
+        function playSoundTone(freq, type = 'sine', duration = 0.08, gainVal = 0.15) {
+            if (!soundEnabled) return;
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                gain.gain.setValueAtTime(gainVal, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch (e) {}
+        }
+
+        // Distinct Warning Ping for Check
+        function playCheckAlertAudio() {
+            if (!soundEnabled) return;
+            playSoundTone(784, 'sawtooth', 0.12, 0.22); // G5
+            setTimeout(() => {
+                playSoundTone(987.77, 'square', 0.25, 0.25); // B5 Urgent ping
+            }, 90);
+        }
+
+        function playMoveAudio(isCapture = false, isCheck = false) {
+            if (isCheck) {
+                playCheckAlertAudio();
+            } else if (isCapture) {
+                playSoundTone(240, 'square', 0.09, 0.18);
+            } else {
+                playSoundTone(390, 'sine', 0.06, 0.14);
+            }
+        }
+
+        function playVictorySound() {
+            if (!soundEnabled) return;
+            const sequence = [
+                { f: 523.25, d: 0.15, wait: 0 },
+                { f: 659.25, d: 0.15, wait: 130 },
+                { f: 783.99, d: 0.15, wait: 260 },
+                { f: 1046.5, d: 0.45, wait: 390 },
+                { f: 880.00, d: 0.18, wait: 800 },
+                { f: 1046.5, d: 0.70, wait: 1000 }
+            ];
+            sequence.forEach(s => {
+                setTimeout(() => playSoundTone(s.f, 'triangle', s.d, 0.28), s.wait);
+            });
+        }
+
+        /* ==========================================================
+           3. CANVAS FIREWORKS PARTICLE CELEBRATION
+           ========================================================== */
+        const canvas = document.getElementById('fireworksCanvas');
+        const ctx = canvas.getContext('2d');
+        let fireworksActive = false;
+        let particles = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.color = color;
+                const angle = Math.random() * Math.PI * 2;
+                const speed = Math.random() * 6.5 + 2.5;
+                this.vx = Math.cos(angle) * speed;
+                this.vy = Math.sin(angle) * speed;
+                this.alpha = 1;
+                this.decay = Math.random() * 0.016 + 0.009;
+                this.gravity = 0.14;
+                this.size = Math.random() * 3.5 + 2;
+            }
+            update() {
+                this.vx *= 0.98;
+                this.vy += this.gravity;
+                this.x += this.vx;
+                this.y += this.vy;
+                this.alpha -= this.decay;
+            }
+            draw(ctx) {
+                ctx.save();
+                ctx.globalAlpha = Math.max(0, this.alpha);
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        function createFirework(targetX, targetY) {
+            const colors = ['#22c55e', '#eab308', '#ef4444', '#38bdf8', '#a855f7', '#f97316'];
+            for (let i = 0; i < 70; i++) {
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                particles.push(new Particle(targetX, targetY, color));
+            }
+        }
+
+        let fireworkTimer = null;
+        function startFireworks() {
+            fireworksActive = true;
+            particles = [];
+            createFirework(canvas.width * 0.5, canvas.height * 0.35);
+            setTimeout(() => createFirework(canvas.width * 0.35, canvas.height * 0.45), 250);
+            setTimeout(() => createFirework(canvas.width * 0.65, canvas.height * 0.4), 500);
+
+            fireworkTimer = setInterval(() => {
+                if (!fireworksActive) return;
+                const rx = canvas.width * (0.2 + Math.random() * 0.6);
+                const ry = canvas.height * (0.2 + Math.random() * 0.4);
+                createFirework(rx, ry);
+            }, 650);
+
+            animateFireworks();
+        }
+
+        function stopFireworks() {
+            fireworksActive = false;
+            if (fireworkTimer) clearInterval(fireworkTimer);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles = [];
+        }
+
+        function animateFireworks() {
+            if (!fireworksActive && particles.length === 0) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                return;
+            }
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.update();
+                p.draw(ctx);
+                if (p.alpha <= 0) particles.splice(i, 1);
+            }
+            requestAnimationFrame(animateFireworks);
+        }
+
+        /* ==========================================================
+           4. CHESS CORE & VALIDATION LOGIC
+           ========================================================== */
+        function getStartingBoard() {
+            return [
+                ['bR', 'bN', 'bB', 'bQ', 'bK', 'bB', 'bN', 'bR'],
+                ['bP', 'bP', 'bP', 'bP', 'bP', 'bP', 'bP', 'bP'],
+                [null, null, null, null, null, null, null, null],
+                [null, null, null, null, null, null, null, null],
+                [null, null, null, null, null, null, null, null],
+                [null, null, null, null, null, null, null, null],
+                ['wP', 'wP', 'wP', 'wP', 'wP', 'wP', 'wP', 'wP'],
+                ['wR', 'wN', 'wB', 'wQ', 'wK', 'wB', 'wN', 'wR']
+            ];
+        }
+
+        let board = getStartingBoard();
+        let turn = 'w';
+        let selectedSquare = null;
+        let validMoves = [];
+        let moveHistory = [];
+        let capturedWhite = [];
+        let capturedBlack = [];
+        let gameMode = 'ai';
+        let boardFlipped = false;
+        let isGameOver = false;
+
+        function isInside(r, c) {
+            return r >= 0 && r < 8 && c >= 0 && c < 8;
+        }
+
+        function getRawMoves(r, c, customBoard = board) {
+            const piece = customBoard[r][c];
+            if (!piece) return [];
+            const color = piece[0];
+            const type = piece[1];
+            const moves = [];
+
+            const addMove = (tr, tc) => {
+                if (!isInside(tr, tc)) return false;
+                const target = customBoard[tr][tc];
+                if (!target) {
+                    moves.push({ r: tr, c: tc });
+                    return true;
+                }
+                if (target[0] !== color) {
+                    moves.push({ r: tr, c: tc });
+                }
+                return false;
+            };
+
+            // PAWN
+            if (type === 'P') {
+                const dir = (color === 'w') ? -1 : 1;
+                const startRow = (color === 'w') ? 6 : 1;
+                if (isInside(r + dir, c) && !customBoard[r + dir][c]) {
+                    moves.push({ r: r + dir, c: c });
+                    if (r === startRow && !customBoard[r + 2 * dir][c]) {
+                        moves.push({ r: r + 2 * dir, c: c });
+                    }
+                }
+                for (let dc of [-1, 1]) {
+                    let tr = r + dir, tc = c + dc;
+                    if (isInside(tr, tc) && customBoard[tr][tc] && customBoard[tr][tc][0] !== color) {
+                        moves.push({ r: tr, c: tc });
+                    }
+                }
+            }
+
+            // KNIGHT
+            if (type === 'N') {
+                const knightOffsets = [
+                    [-2, -1], [-2, 1], [-1, -2], [-1, 2],
+                    [1, -2], [1, 2], [2, -1], [2, 1]
+                ];
+                for (let [dr, dc] of knightOffsets) addMove(r + dr, c + dc);
+            }
+
+            // BISHOP & QUEEN
+            if (type === 'B' || type === 'Q') {
+                const directions = [[-1, -1], [-1, 1], [1, -1], [1, 1]];
+                for (let [dr, dc] of directions) {
+                    let tr = r + dr, tc = c + dc;
+                    while (isInside(tr, tc)) {
+                        if (!addMove(tr, tc)) break;
+                        tr += dr;
+                        tc += dc;
+                    }
+                }
+            }
+
+            // ROOK & QUEEN
+            if (type === 'R' || type === 'Q') {
+                const directions = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+                for (let [dr, dc] of directions) {
+                    let tr = r + dr, tc = c + dc;
+                    while (isInside(tr, tc)) {
+                        if (!addMove(tr, tc)) break;
+                        tr += dr;
+                        tc += dc;
+                    }
+                }
+            }
+
+            // KING
+            if (type === 'K') {
+                const kingOffsets = [
+                    [-1, -1], [-1, 0], [-1, 1],
+                    [0, -1],           [0, 1],
+                    [1, -1],  [1, 0],  [1, 1]
+                ];
+                for (let [dr, dc] of kingOffsets) addMove(r + dr, c + dc);
+            }
+
+            return moves;
+        }
+
+        function findKing(color, customBoard = board) {
+            for (let r = 0; r < 8; r++) {
+                for (let c = 0; c < 8; c++) {
+                    if (customBoard[r][c] === color + 'K') return { r, c };
+                }
+            }
+            return null;
+        }
+
+        function isKingInCheck(color, customBoard = board) {
+            const kingPos = findKing(color, customBoard);
+            if (!kingPos) return false;
+            const enemyColor = color === 'w' ? 'b' : 'w';
+
+            for (let r = 0; r < 8; r++) {
+                for (let c = 0; c < 8; c++) {
+                    const piece = customBoard[r][c];
+                    if (piece && piece[0] === enemyColor) {
+                        const moves = getRawMoves(r, c, customBoard);
+                        if (moves.some(m => m.r === kingPos.r && m.c === kingPos.c)) {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+        function getLegalMoves(r, c, customBoard = board) {
+            const piece = customBoard[r][c];
+            if (!piece) return [];
+            const color = piece[0];
+            const rawMoves = getRawMoves(r, c, customBoard);
+
+            return rawMoves.filter(m => {
+                const originalDest = customBoard[m.r][m.c];
+                customBoard[m.r][m.c] = piece;
+                customBoard[r][c] = null;
+
+                const inCheck = isKingInCheck(color, customBoard);
+
+                customBoard[r][c] = piece;
+                customBoard[m.r][m.c] = originalDest;
+                return !inCheck;
+            });
+        }
+
+        function getAllLegalMoves(color, customBoard = board) {
+            const moves = [];
+            for (let r = 0; r < 8; r++) {
+                for (let c = 0; c < 8; c++) {
+                    if (customBoard[r][c] && customBoard[r][c][0] === color) {
+                        const pieceMoves = getLegalMoves(r, c, customBoard);
+                        for (let m of pieceMoves) {
+                            moves.push({ from: { r, c }, to: m });
+                        }
+                    }
+                }
+            }
+            return moves;
+        }
+
+        function executeMove(fromR, fromC, toR, toC) {
+            const movingPiece = board[fromR][fromC];
+            const capturedPiece = board[toR][toC];
+            const color = movingPiece[0];
+
+            board[toR][toC] = movingPiece;
+            board[fromR][fromC] = null;
+
+            let promoted = false;
+            if (movingPiece[1] === 'P' && (toR === 0 || toR === 7)) {
+                board[toR][toC] = color + 'Q';
+                promoted = true;
+            }
+
+            if (capturedPiece) {
+                if (color === 'w') capturedWhite.push(capturedPiece);
+                else capturedBlack.push(capturedPiece);
+            }
+
+            const nextColor = (color === 'w') ? 'b' : 'w';
+            const opponentInCheck = isKingInCheck(nextColor);
+
+            const cols = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+            const notation = `${movingPiece[1] !== 'P' ? movingPiece[1] : ''}${cols[fromC]}${8 - fromR}${capturedPiece ? 'x' : '-'}${cols[toC]}${8 - toR}${promoted ? '=Q' : ''}`;
+
+            moveHistory.push({
+                from: { r: fromR, c: fromC },
+                to: { r: toR, c: toC },
+                piece: movingPiece,
+                captured: capturedPiece,
+                notation: notation + (opponentInCheck ? '+' : ''),
+                color: color
+            });
+
+            playMoveAudio(!!capturedPiece, opponentInCheck);
+
+            turn = nextColor;
+            checkEndGameStatus();
+            render();
+
+            if (!isGameOver && gameMode === 'ai' && turn === 'b') {
+                setTimeout(makeAIMove, 280);
+            }
+        }
+
+        function checkEndGameStatus() {
+            const legalMoves = getAllLegalMoves(turn);
+            const inCheck = isKingInCheck(turn);
+
+            if (legalMoves.length === 0) {
+                isGameOver = true;
+                const winner = turn === 'w' ? 'Bên Đen' : 'Bên Trắng';
+                if (inCheck) {
+                    showVictoryCelebration(
+                        `${winner} Thắng Vẻ Vang!`,
+                        `Chiếu bí tuyệt đối! ${turn === 'w' ? 'Bên Trắng' : 'Bên Đen'} không thể di chuyển Vua.`,
+                        true
+                    );
+                } else {
+                    showVictoryCelebration(
+                        'Hòa Cờ (Stalemate)!',
+                        'Không còn bất kỳ nước đi hợp lệ nào và Vua không bị chiếu.',
+                        false
+                    );
+                }
+            }
+        }
+
+        function showVictoryCelebration(title, desc, isWin = true) {
+            document.getElementById('victoryTitle').innerText = title;
+            document.getElementById('victoryDesc').innerText = desc;
+            document.getElementById('victoryModal').classList.remove('hidden');
+
+            if (isWin) {
+                playVictorySound();
+                startFireworks();
+            }
+        }
+
+        function evaluateBoard(customBoard) {
+            let score = 0;
+            for (let r = 0; r < 8; r++) {
+                for (let c = 0; c < 8; c++) {
+                    const p = customBoard[r][c];
+                    if (p) {
+                        const val = PIECE_VALUES[p[1]] || 0;
+                        const centerBonus = (3.5 - Math.abs(3.5 - r)) + (3.5 - Math.abs(3.5 - c));
+                        const total = val + centerBonus * 4;
+                        score += (p[0] === 'b') ? total : -total;
+                    }
+                }
+            }
+            return score;
+        }
+
+        function makeAIMove() {
+            if (isGameOver) return;
+            const blackMoves = getAllLegalMoves('b');
+            if (blackMoves.length === 0) return;
+
+            let bestScore = -Infinity;
+            let bestMove = blackMoves[0];
+
+            for (let m of blackMoves) {
+                const orig = board[m.to.r][m.to.c];
+                const piece = board[m.from.r][m.from.c];
+
+                board[m.to.r][m.to.c] = piece;
+                board[m.from.r][m.from.c] = null;
+
+                let score = evaluateBoard(board);
+                if (orig) score += (PIECE_VALUES[orig[1]] || 0) * 1.5;
+
+                board[m.from.r][m.from.c] = piece;
+                board[m.to.r][m.to.c] = orig;
+
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestMove = m;
+                }
+            }
+
+            executeMove(bestMove.from.r, bestMove.from.c, bestMove.to.r, bestMove.to.c);
+        }
+
+        /* ==========================================================
+           5. BOARD RENDERING & CHECK HIGHLIGHTING
+           ========================================================== */
+        const boardEl = document.getElementById('chessboard');
+
+        function render() {
+            boardEl.innerHTML = '';
+            const lastMove = moveHistory[moveHistory.length - 1];
+            const inCheck = isKingInCheck(turn);
+            const checkedKingPos = inCheck ? findKing(turn) : null;
+            const cols = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+
+            // Update floating Check alert banner
+            const checkAlertBanner = document.getElementById('checkAlertBanner');
+            const checkAlertText = document.getElementById('checkAlertText');
+            if (inCheck && !isGameOver) {
+                checkAlertBanner.classList.remove('hidden');
+                checkAlertText.innerText = `CẢNH BÁO: VUA ${turn === 'w' ? 'TRẮNG' : 'ĐEN'} ĐANG BỊ CHIẾU TƯỚNG!`;
+            } else {
+                checkAlertBanner.classList.add('hidden');
+            }
+
+            for (let i = 0; i < 8; i++) {
+                for (let j = 0; j < 8; j++) {
+                    const r = boardFlipped ? 7 - i : i;
+                    const c = boardFlipped ? 7 - j : j;
+
+                    const square = document.createElement('div');
+                    const isDark = (r + c) % 2 === 1;
+                    square.className = `relative flex items-center justify-center ${isDark ? 'square-dark' : 'square-light'}`;
+                    square.dataset.row = r;
+                    square.dataset.col = c;
+
+                    // Rank & File labels
+                    if (j === 0) {
+                        const rankLabel = document.createElement('span');
+                        rankLabel.className = `coord-label top-1 left-1.5 ${isDark ? 'text-[#eeeed2]/85' : 'text-[#769656]/90'}`;
+                        rankLabel.innerText = 8 - r;
+                        square.appendChild(rankLabel);
+                    }
+                    if (i === 7) {
+                        const fileLabel = document.createElement('span');
+                        fileLabel.className = `coord-label bottom-0.5 right-1.5 ${isDark ? 'text-[#eeeed2]/85' : 'text-[#769656]/90'}`;
+                        fileLabel.innerText = cols[c];
+                        square.appendChild(fileLabel);
+                    }
+
+                    // Selected square
+                    if (selectedSquare && selectedSquare.r === r && selectedSquare.c === c) {
+                        square.classList.add('square-selected');
+                    }
+
+                    // Previous move highlight
+                    if (lastMove && ((lastMove.from.r === r && lastMove.from.c === c) || (lastMove.to.r === r && lastMove.to.c === c))) {
+                        square.classList.add('square-prev');
+                    }
+
+                    // CHECK GLOW EFFECT ON KING SQUARE
+                    const isKingCheckedSquare = checkedKingPos && checkedKingPos.r === r && checkedKingPos.c === c;
+                    if (isKingCheckedSquare) {
+                        square.classList.add('square-check-glow');
+                    }
+
+                    // Piece Rendering
+                    const piece = board[r][c];
+                    if (piece) {
+                        const pieceWrapper = document.createElement('div');
+                        pieceWrapper.className = 'piece-container';
+                        if (isKingCheckedSquare) {
+                            pieceWrapper.classList.add('king-tremor');
+                        }
+                        pieceWrapper.innerHTML = SVG_PIECES[piece];
+                        square.appendChild(pieceWrapper);
+                    }
+
+                    // Move & capture hints
+                    const isTargetMove = validMoves.some(m => m.r === r && m.c === c);
+                    if (isTargetMove) {
+                        const hint = document.createElement('div');
+                        hint.className = piece ? 'capture-hint' : 'move-hint';
+                        square.appendChild(hint);
+                    }
+
+                    square.addEventListener('click', () => handleSquareClick(r, c));
+                    boardEl.appendChild(square);
+                }
+            }
+
+            updateUI();
+        }
+
+        function handleSquareClick(r, c) {
+            if (isGameOver) return;
+            if (gameMode === 'ai' && turn === 'b') return;
+
+            const clickedPiece = board[r][c];
+
+            if (selectedSquare) {
+                const move = validMoves.find(m => m.r === r && m.c === c);
+                if (move) {
+                    executeMove(selectedSquare.r, selectedSquare.c, r, c);
+                    selectedSquare = null;
+                    validMoves = [];
+                    return;
+                }
+            }
+
+            if (clickedPiece && clickedPiece[0] === turn) {
+                selectedSquare = { r, c };
+                validMoves = getLegalMoves(r, c);
+                playSoundTone(480, 'sine', 0.05, 0.1);
+            } else {
+                selectedSquare = null;
+                validMoves = [];
+            }
+
+            render();
+        }
+
+        function updateUI() {
+            const statusText = document.getElementById('gameStatusText');
+            const topBadge = document.getElementById('topPlayerBadge');
+            const bottomBadge = document.getElementById('bottomPlayerBadge');
+
+            const isWhiteTurn = turn === 'w';
+            statusText.innerHTML = isWhiteTurn 
+                ? '<span class="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400"></span> Trắng đi' 
+                : '<span class="w-2.5 h-2.5 rounded-full bg-amber-400 shadow-sm shadow-amber-400"></span> Đen đi';
+
+            if (boardFlipped) {
+                topBadge.innerText = isWhiteTurn ? 'Lượt đi' : 'Chờ';
+                topBadge.className = isWhiteTurn ? 'text-xs px-3 py-1 rounded-full font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : 'text-xs px-3 py-1 rounded-full font-semibold bg-slate-800 text-slate-400 border border-slate-700';
+                
+                bottomBadge.innerText = !isWhiteTurn ? 'Lượt đi' : 'Chờ';
+                bottomBadge.className = !isWhiteTurn ? 'text-xs px-3 py-1 rounded-full font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : 'text-xs px-3 py-1 rounded-full font-semibold bg-slate-800 text-slate-400 border border-slate-700';
+            } else {
+                bottomBadge.innerText = isWhiteTurn ? 'Lượt đi' : 'Chờ';
+                bottomBadge.className = isWhiteTurn ? 'text-xs px-3 py-1 rounded-full font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : 'text-xs px-3 py-1 rounded-full font-semibold bg-slate-800 text-slate-400 border border-slate-700';
+
+                topBadge.innerText = !isWhiteTurn ? 'Lượt đi' : 'Chờ';
+                topBadge.className = !isWhiteTurn ? 'text-xs px-3 py-1 rounded-full font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : 'text-xs px-3 py-1 rounded-full font-semibold bg-slate-800 text-slate-400 border border-slate-700';
+            }
+
+            // Render Captured Pieces
+            const renderCapturedList = (list) => list.map(p => `<span class="inline-block w-5 h-5 drop-shadow-sm">${SVG_PIECES[p]}</span>`).join('');
+            document.getElementById('whiteCaptures').innerHTML = renderCapturedList(capturedWhite);
+            document.getElementById('blackCaptures').innerHTML = renderCapturedList(capturedBlack);
+
+            // History Log Table
+            const historyList = document.getElementById('moveLogList');
+            document.getElementById('moveCountBadge').innerText = `${moveHistory.length} nước`;
+
+            if (moveHistory.length === 0) {
+                historyList.innerHTML = '<div class="text-slate-500 italic text-center py-10">Bàn cờ đã sẵn sàng...</div>';
+            } else {
+                let html = '<table class="w-full text-left">';
+                for (let i = 0; i < moveHistory.length; i += 2) {
+                    const moveNum = Math.floor(i / 2) + 1;
+                    const whiteMove = moveHistory[i];
+                    const blackMove = moveHistory[i + 1];
+                    html += `
+                        <tr class="border-b border-slate-800/60 hover:bg-slate-800/40 transition">
+                            <td class="py-1.5 text-slate-500 w-8 pl-1 font-semibold">${moveNum}.</td>
+                            <td class="py-1.5 font-bold text-slate-100">${whiteMove ? whiteMove.notation : ''}</td>
+                            <td class="py-1.5 font-bold text-emerald-400">${blackMove ? blackMove.notation : ''}</td>
+                        </tr>
+                    `;
+                }
+                html += '</table>';
+                historyList.innerHTML = html;
+                historyList.scrollTop = historyList.scrollHeight;
+            }
+        }
+
+        /* ==========================================================
+           6. CONTROLS INITIALIZATION
+           ========================================================== */
+        function initControls() {
+            const resetGame = () => {
+                board = getStartingBoard();
+                turn = 'w';
+                selectedSquare = null;
+                validMoves = [];
+                moveHistory = [];
+                capturedWhite = [];
+                capturedBlack = [];
+                isGameOver = false;
+                stopFireworks();
+                document.getElementById('victoryModal').classList.add('hidden');
+                document.getElementById('checkAlertBanner').classList.add('hidden');
+                render();
+            };
+
+            document.getElementById('newGameBtn').addEventListener('click', resetGame);
+            document.getElementById('modalNewGameBtn').addEventListener('click', resetGame);
+            document.getElementById('closeModalBtn').addEventListener('click', () => {
+                document.getElementById('victoryModal').classList.add('hidden');
+            });
+
+            // Resign
+            document.getElementById('resignBtn').addEventListener('click', () => {
+                if (isGameOver) return;
+                isGameOver = true;
+                const winner = turn === 'w' ? 'Bên Đen' : 'Bên Trắng';
+                showVictoryCelebration(
+                    `${winner} Thắng Cuộc!`,
+                    `Đối thủ đã xin đầu hàng. Trận đấu kết thúc!`,
+                    true
+                );
+            });
+
+            // Flip Board
+            document.getElementById('flipBtn').addEventListener('click', () => {
+                boardFlipped = !boardFlipped;
+                render();
+            });
+
+            // Undo
+            document.getElementById('undoBtn').addEventListener('click', () => {
+                if (moveHistory.length === 0 || isGameOver) return;
+                const stepsToUndo = (gameMode === 'ai' && moveHistory.length >= 2 && turn === 'w') ? 2 : 1;
+                
+                for (let s = 0; s < stepsToUndo; s++) {
+                    const last = moveHistory.pop();
+                    if (!last) break;
+                    
+                    board[last.from.r][last.from.c] = last.piece;
+                    board[last.to.r][last.to.c] = last.captured;
+                    
+                    if (last.captured) {
+                        if (last.color === 'w') capturedWhite.pop();
+                        else capturedBlack.pop();
+                    }
+                    turn = last.color;
+                }
+                
+                selectedSquare = null;
+                validMoves = [];
+                render();
+                playSoundTone(300, 'sine', 0.1);
+            });
+
+            // Mode Select
+            const modeAiBtn = document.getElementById('modeAiBtn');
+            const modePassBtn = document.getElementById('modePassBtn');
+            const topName = document.getElementById('topPlayerName');
+            const topIcon = document.getElementById('topPlayerIcon');
+
+            modeAiBtn.addEventListener('click', () => {
+                gameMode = 'ai';
+                modeAiBtn.className = 'px-3 py-2.5 rounded-xl text-xs sm:text-sm font-bold border border-emerald-500/80 bg-emerald-500/15 text-emerald-300 flex items-center justify-center gap-2 transition shadow-sm';
+                modePassBtn.className = 'px-3 py-2.5 rounded-xl text-xs sm:text-sm font-bold border border-slate-700 bg-slate-800/60 text-slate-400 hover:bg-slate-800 hover:text-slate-200 flex items-center justify-center gap-2 transition';
+                topName.innerHTML = 'AI Bot (Đen) <span class="text-[10px] px-1.5 py-0.5 bg-slate-700 rounded text-slate-300 font-mono">1550 ELO</span>';
+                topIcon.className = 'fa-solid fa-robot text-lg text-indigo-400';
+                resetGame();
+            });
+
+            modePassBtn.addEventListener('click', () => {
+                gameMode = 'pass';
+                modePassBtn.className = 'px-3 py-2.5 rounded-xl text-xs sm:text-sm font-bold border border-emerald-500/80 bg-emerald-500/15 text-emerald-300 flex items-center justify-center gap-2 transition shadow-sm';
+                modeAiBtn.className = 'px-3 py-2.5 rounded-xl text-xs sm:text-sm font-bold border border-slate-700 bg-slate-800/60 text-slate-400 hover:bg-slate-800 hover:text-slate-200 flex items-center justify-center gap-2 transition';
+                topName.innerHTML = 'Người Chơi 2 (Đen) <span class="text-[10px] px-1.5 py-0.5 bg-slate-700 rounded text-slate-300 font-mono">Đối thủ</span>';
+                topIcon.className = 'fa-solid fa-user text-lg text-emerald-400';
+                resetGame();
+            });
+
+            // Sound Button
+            const soundBtn = document.getElementById('soundToggleBtn');
+            const soundIcon = document.getElementById('soundIcon');
+            soundBtn.addEventListener('click', () => {
+                soundEnabled = !soundEnabled;
+                if (soundEnabled) {
+                    soundIcon.className = 'fa-solid fa-volume-high text-base text-emerald-400';
+                } else {
+                    soundIcon.className = 'fa-solid fa-volume-xmark text-base text-slate-500';
+                }
+            });
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initControls();
+            render();
+        });
+    </script>
+</body>
+</html>
