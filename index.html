@@ -3,13 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chess Master - Chess.com Neo Edition</title>
+    <title>Chess Master - Online Multiplayer Neo Edition</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    
+    <!-- Firebase SDK Compat Version (Chạy trực tiếp 100% trên trình duyệt và GitHub Pages) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
     <style>
-        /* Exact Chess.com Green Board Palette */
+        /* Bàn cờ chuẩn màu xanh Chess.com */
         .square-light {
             background-color: #eeeed2;
         }
@@ -17,15 +22,15 @@
             background-color: #769656;
         }
 
-        /* Move Highlighting */
+        /* Highlight ô đang chọn và nước vừa đi */
         .square-selected {
             background-color: #baca44 !important;
         }
         .square-prev {
-            background-color: rgba(205, 210, 106, 0.82) !important;
+            background-color: rgba(205, 210, 106, 0.85) !important;
         }
 
-        /* DRAMATIC CHECK WARNING EFFECT */
+        /* HIỆU ỨNG CẢNH BÁO CHIẾU TƯỚNG (KING CHECK GLOW) */
         .square-check-glow {
             background: radial-gradient(ellipse at center, rgba(239, 68, 68, 0.95) 0%, rgba(220, 38, 38, 0.7) 45%, rgba(185, 28, 28, 0.35) 75%, transparent 100%) !important;
             animation: pulse-check 1.1s infinite alternate cubic-bezier(0.4, 0, 0.6, 1);
@@ -36,7 +41,7 @@
                 box-shadow: inset 0 0 15px rgba(239, 68, 68, 0.8), 0 0 20px rgba(239, 68, 68, 0.6);
             }
             100% {
-                box-shadow: inset 0 0 30px rgba(220, 38, 38, 1), 0 0 32px rgba(239, 68, 68, 0.9);
+                box-shadow: inset 0 0 30px rgba(220, 38, 38, 1), 0 0 35px rgba(239, 68, 68, 0.9);
             }
         }
 
@@ -46,13 +51,13 @@
 
         @keyframes king-alert-tremor {
             0%, 100% { transform: scale(1.06) rotate(0deg); }
-            20% { transform: scale(1.09) rotate(-3deg); }
-            40% { transform: scale(1.09) rotate(3deg); }
+            20% { transform: scale(1.09) rotate(-3.5deg); }
+            40% { transform: scale(1.09) rotate(3.5deg); }
             60% { transform: scale(1.09) rotate(-2deg); }
             80% { transform: scale(1.09) rotate(2deg); }
         }
 
-        /* Chess Piece Styling */
+        /* Thiết kế quân cờ */
         .piece-container {
             width: 90%;
             height: 90%;
@@ -66,13 +71,13 @@
         }
 
         .piece-container:hover {
-            transform: scale(1.06) translateY(-2px);
-            filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.35));
+            transform: scale(1.08) translateY(-2px);
+            filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.4));
         }
 
         .piece-container:active {
             cursor: grabbing;
-            transform: scale(1.12) translateY(-4px);
+            transform: scale(1.15) translateY(-4px);
         }
 
         .piece-svg {
@@ -82,13 +87,13 @@
             overflow: visible;
         }
 
-        /* Hints */
+        /* Gợi ý nước đi */
         .move-hint {
             position: absolute;
-            width: 32%;
-            height: 32%;
+            width: 30%;
+            height: 30%;
             border-radius: 50%;
-            background: rgba(30, 41, 59, 0.28);
+            background: rgba(30, 41, 59, 0.32);
             pointer-events: none;
             z-index: 15;
             transition: transform 0.2s ease;
@@ -99,8 +104,8 @@
             width: 86%;
             height: 86%;
             border-radius: 50%;
-            border: 6px solid rgba(225, 29, 72, 0.55);
-            background: rgba(225, 29, 72, 0.08);
+            border: 6px solid rgba(225, 29, 72, 0.6);
+            background: rgba(225, 29, 72, 0.1);
             pointer-events: none;
             z-index: 15;
             animation: pulse-capture 1.3s infinite alternate;
@@ -111,7 +116,6 @@
             100% { transform: scale(1.03); opacity: 1; }
         }
 
-        /* Coordinates label */
         .coord-label {
             position: absolute;
             font-size: 11px;
@@ -138,12 +142,12 @@
         }
     </style>
 </head>
-<body class="bg-gradient-to-br from-[#12161a] via-[#1a2026] to-[#0f1216] text-slate-100 min-h-screen flex flex-col font-['Plus_Jakarta_Sans',sans-serif] selection:bg-emerald-500 selection:text-black relative overflow-x-hidden">
+<body class="bg-gradient-to-br from-[#111417] via-[#181d23] to-[#0d1013] text-slate-100 min-h-screen flex flex-col font-['Plus_Jakarta_Sans',sans-serif] selection:bg-emerald-500 selection:text-black relative overflow-x-hidden">
 
-    <!-- Fullscreen Fireworks Canvas -->
+    <!-- Canvas Pháo hoa toàn màn hình -->
     <canvas id="fireworksCanvas"></canvas>
 
-    <!-- Top Navigation -->
+    <!-- Header điều hướng -->
     <header class="w-full max-w-6xl mx-auto px-4 py-3 flex items-center justify-between border-b border-slate-800/80 backdrop-blur-md">
         <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-xl bg-[#769656] flex items-center justify-center shadow-lg shadow-emerald-900/30 text-white text-xl font-bold">
@@ -151,38 +155,60 @@
             </div>
             <div>
                 <h1 class="text-xl md:text-2xl font-black tracking-tight text-white flex items-center gap-2">
-                    Chess Master <span class="text-[10px] uppercase font-bold tracking-wider bg-emerald-500/20 text-emerald-400 px-2.5 py-0.5 rounded-full border border-emerald-500/30">Neo Theme</span>
+                    Chess Master <span class="text-[10px] uppercase font-bold tracking-wider bg-emerald-500/20 text-emerald-400 px-2.5 py-0.5 rounded-full border border-emerald-500/30">Neo Live</span>
                 </h1>
-                <p class="text-xs text-slate-400 hidden sm:block">Giao diện xanh chuẩn Chess.com & Bộ quân Neo cao cấp</p>
+                <p class="text-xs text-slate-400 hidden sm:block">Realtime Multiplayer Firebase & Chuẩn Neo Chess.com</p>
             </div>
         </div>
 
         <div class="flex items-center gap-2.5">
+            <div id="connectionStatusBadge" class="hidden sm:flex items-center gap-2 text-xs bg-slate-800/90 px-3.5 py-2 rounded-xl border border-slate-700/60 text-slate-300 font-medium">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" id="connDot"></span>
+                <span id="connText">Chế độ Offline / AI</span>
+            </div>
             <button id="soundToggleBtn" class="p-2.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 transition border border-slate-700/60 shadow-sm" title="Bật/Tắt âm thanh">
                 <i class="fa-solid fa-volume-high text-base text-emerald-400" id="soundIcon"></i>
             </button>
-            <div class="hidden sm:flex items-center gap-2 text-xs bg-slate-800/90 px-3.5 py-2 rounded-xl border border-slate-700/60 text-slate-300 shadow-sm font-medium">
-                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span>Chess Engine Pro</span>
-            </div>
         </div>
     </header>
 
-    <!-- Check Alert Floating Banner -->
+    <!-- Banner Cảnh báo Chiếu tướng -->
     <div id="checkAlertBanner" class="hidden w-full max-w-md mx-auto px-4 mt-2 transition-all duration-300">
-        <div class="bg-rose-600/90 text-white font-extrabold text-sm py-2 px-4 rounded-xl border-2 border-rose-400 flex items-center justify-center gap-2.5 shadow-xl shadow-rose-900/50 animate-bounce">
+        <div class="bg-rose-600/95 text-white font-extrabold text-sm py-2.5 px-4 rounded-xl border-2 border-rose-400 flex items-center justify-center gap-2.5 shadow-xl shadow-rose-900/50 animate-bounce">
             <i class="fa-solid fa-triangle-exclamation text-amber-300 text-lg"></i>
-            <span id="checkAlertText">CẢNH BÁO: VUA ĐANG BỊ CHIẾU!</span>
+            <span id="checkAlertText">CẢNH BÁO: VUA ĐANG BỊ CHIẾU TƯỚNG!</span>
         </div>
     </div>
 
-    <!-- Main Chess Playground Area -->
-    <main class="w-full max-w-6xl mx-auto px-2 sm:px-4 py-3 sm:py-5 flex-1 flex flex-col lg:flex-row items-center lg:items-start justify-center gap-6">
+    <!-- Thông báo Online Room Banner -->
+    <div id="onlineRoomBar" class="hidden w-full max-w-6xl mx-auto px-4 mt-2">
+        <div class="bg-gradient-to-r from-emerald-950/70 via-slate-900 to-indigo-950/70 border border-emerald-500/40 rounded-xl p-3 flex flex-wrap items-center justify-between gap-3 text-xs">
+            <div class="flex items-center gap-2">
+                <span class="bg-emerald-500/20 text-emerald-300 px-2.5 py-1 rounded-lg border border-emerald-500/30 font-bold flex items-center gap-1.5">
+                    <i class="fa-solid fa-wifi text-emerald-400"></i> Phòng: <span id="displayRoomCode" class="font-mono text-sm tracking-wider font-extrabold text-white">------</span>
+                </span>
+                <span id="displayPlayerRole" class="text-slate-300 font-semibold px-2 py-1 rounded bg-slate-800 border border-slate-700">
+                    Bạn: Cầm Trắng ⚪
+                </span>
+            </div>
+            <div class="flex items-center gap-2">
+                <button id="copyRoomLinkBtn" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg border border-slate-600 flex items-center gap-1.5 transition font-semibold">
+                    <i class="fa-solid fa-link text-indigo-400"></i> Sao chép Link mời
+                </button>
+                <button id="leaveRoomBtn" class="px-3 py-1.5 bg-rose-900/40 hover:bg-rose-800/60 text-rose-300 rounded-lg border border-rose-600/50 flex items-center gap-1.5 transition font-semibold">
+                    <i class="fa-solid fa-right-from-bracket"></i> Rời phòng
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Khu vực chơi cờ chính -->
+    <main class="w-full max-w-6xl mx-auto px-2 sm:px-4 py-3 sm:py-4 flex-1 flex flex-col lg:flex-row items-center lg:items-start justify-center gap-6">
         
-        <!-- Chess Board Column -->
+        <!-- Cột bàn cờ -->
         <div class="flex flex-col items-center w-full max-w-[530px]">
-            <!-- Top Player Banner -->
-            <div class="w-full flex items-center justify-between bg-slate-850/90 bg-[#21262d] px-4 py-2.5 rounded-t-2xl border-t border-x border-slate-700/70 shadow-lg">
+            <!-- Thông tin Người chơi phía trên -->
+            <div class="w-full flex items-center justify-between bg-[#21262d] px-4 py-2.5 rounded-t-2xl border-t border-x border-slate-700/70 shadow-lg">
                 <div class="flex items-center gap-3">
                     <div id="topPlayerAvatar" class="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center font-bold text-slate-300 border border-slate-600/80 shadow-md">
                         <i class="fa-solid fa-robot text-lg text-indigo-400" id="topPlayerIcon"></i>
@@ -190,7 +216,7 @@
                     <div>
                         <div class="text-sm font-bold flex items-center gap-2 text-slate-100" id="topPlayerName">
                             AI Bot (Đen)
-                            <span class="text-[10px] px-1.5 py-0.5 bg-slate-700 rounded text-slate-300 font-mono">1550 ELO</span>
+                            <span class="text-[10px] px-1.5 py-0.5 bg-slate-700 rounded text-slate-300 font-mono" id="topPlayerSub">1550 ELO</span>
                         </div>
                         <div class="flex items-center gap-1 min-h-[22px]" id="blackCaptures"></div>
                     </div>
@@ -200,23 +226,23 @@
                 </div>
             </div>
 
-            <!-- The Board Box -->
+            <!-- Bàn cờ 8x8 -->
             <div class="relative w-full aspect-square bg-[#262522] p-2 sm:p-2.5 shadow-2xl border-x border-slate-700/70">
                 <div id="chessboard" class="w-full h-full grid grid-cols-8 grid-rows-8 rounded-sm overflow-hidden border border-black/40 shadow-inner select-none relative">
-                    <!-- 64 chess cells will be generated via JS -->
+                    <!-- 64 ô cờ render bằng JavaScript -->
                 </div>
             </div>
 
-            <!-- Bottom Player Banner -->
+            <!-- Thông tin Người chơi phía dưới -->
             <div class="w-full flex items-center justify-between bg-[#21262d] px-4 py-2.5 rounded-b-2xl border-b border-x border-slate-700/70 shadow-lg">
                 <div class="flex items-center gap-3">
                     <div id="bottomPlayerAvatar" class="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center font-bold text-emerald-400 shadow-md">
-                        <i class="fa-solid fa-user text-lg"></i>
+                        <i class="fa-solid fa-user text-lg" id="bottomPlayerIcon"></i>
                     </div>
                     <div>
                         <div class="text-sm font-bold flex items-center gap-2 text-slate-100" id="bottomPlayerName">
                             Bạn (Trắng)
-                            <span class="text-[10px] px-1.5 py-0.5 bg-emerald-500/20 text-emerald-300 rounded border border-emerald-500/30 font-mono">Chủ phòng</span>
+                            <span class="text-[10px] px-1.5 py-0.5 bg-emerald-500/20 text-emerald-300 rounded border border-emerald-500/30 font-mono" id="bottomPlayerSub">Chủ phòng</span>
                         </div>
                         <div class="flex items-center gap-1 min-h-[22px]" id="whiteCaptures"></div>
                     </div>
@@ -227,33 +253,63 @@
             </div>
         </div>
 
-        <!-- Sidebar / Game Controls -->
+        <!-- Sidebar / Điều khiển & Lịch sử -->
         <div class="w-full max-w-[530px] lg:w-80 flex flex-col gap-4">
             
-            <!-- Controls Card -->
-            <div class="bg-slate-900/95 backdrop-blur-md rounded-2xl p-4 border border-slate-800 shadow-xl space-y-4">
-                <!-- Mode Selection -->
+            <!-- Hộp chọn chế độ và kết nối Online -->
+            <div class="bg-slate-900/95 backdrop-blur-md rounded-2xl p-4 border border-slate-800 shadow-xl space-y-3.5">
                 <div>
-                    <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Chế độ chơi</div>
-                    <div class="grid grid-cols-2 gap-2">
-                        <button id="modeAiBtn" class="px-3 py-2.5 rounded-xl text-xs sm:text-sm font-bold border border-emerald-500/80 bg-emerald-500/15 text-emerald-300 flex items-center justify-center gap-2 transition shadow-sm">
-                            <i class="fa-solid fa-robot"></i> Đấu Máy (AI)
+                    <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center justify-between">
+                        <span>Chế độ chơi</span>
+                        <span id="activeModeText" class="text-[10px] text-emerald-400 font-bold font-mono">ĐẤU MÁY (AI)</span>
+                    </div>
+                    
+                    <div class="grid grid-cols-3 gap-1.5">
+                        <button id="modeAiBtn" class="px-2 py-2 rounded-xl text-xs font-bold border border-emerald-500/80 bg-emerald-500/20 text-emerald-300 flex flex-col items-center justify-center gap-1 transition shadow-sm">
+                            <i class="fa-solid fa-robot text-sm"></i>
+                            <span>Đấu AI</span>
                         </button>
-                        <button id="modePassBtn" class="px-3 py-2.5 rounded-xl text-xs sm:text-sm font-bold border border-slate-700 bg-slate-800/60 text-slate-400 hover:bg-slate-800 hover:text-slate-200 flex items-center justify-center gap-2 transition">
-                            <i class="fa-solid fa-user-group"></i> 2 Người
+                        <button id="modePassBtn" class="px-2 py-2 rounded-xl text-xs font-bold border border-slate-700 bg-slate-800/60 text-slate-400 hover:bg-slate-800 hover:text-slate-200 flex flex-col items-center justify-center gap-1 transition">
+                            <i class="fa-solid fa-user-group text-sm"></i>
+                            <span>2 Người</span>
+                        </button>
+                        <button id="modeOnlineBtn" class="px-2 py-2 rounded-xl text-xs font-bold border border-slate-700 bg-slate-800/60 text-slate-400 hover:bg-slate-800 hover:text-slate-200 flex flex-col items-center justify-center gap-1 transition">
+                            <i class="fa-solid fa-globe text-sm text-indigo-400"></i>
+                            <span>Online P2P</span>
                         </button>
                     </div>
                 </div>
 
-                <!-- Turn & Status Banner -->
-                <div id="statusBanner" class="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 flex items-center justify-between">
+                <!-- Khung Điều khiển Phòng Online (Ẩn khi ở chế độ thường) -->
+                <div id="onlineControlsBox" class="hidden bg-slate-950/80 border border-indigo-500/40 rounded-xl p-3 space-y-2.5">
+                    <div class="text-[11px] font-extrabold text-indigo-300 flex items-center gap-1.5 uppercase">
+                        <i class="fa-solid fa-tower-broadcast animate-pulse"></i> Kết nối thời gian thực
+                    </div>
+                    <button id="createRoomBtn" class="w-full py-2 bg-gradient-to-r from-indigo-600 to-emerald-600 hover:from-indigo-500 hover:to-emerald-500 text-white font-bold rounded-lg text-xs flex items-center justify-center gap-2 shadow-lg transition">
+                        <i class="fa-solid fa-circle-plus"></i> Tạo Phòng Mới (Cầm Trắng)
+                    </button>
+                    <div class="flex items-center gap-2 text-slate-500 text-xs">
+                        <div class="h-[1px] bg-slate-800 flex-1"></div>
+                        <span>hoặc vào phòng</span>
+                        <div class="h-[1px] bg-slate-800 flex-1"></div>
+                    </div>
+                    <div class="flex gap-2">
+                        <input type="text" id="joinRoomInput" placeholder="Nhập mã phòng..." class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white uppercase font-mono tracking-wider focus:outline-none focus:border-indigo-400">
+                        <button id="joinRoomBtn" class="px-3 py-1.5 bg-slate-800 hover:bg-indigo-600 border border-slate-700 hover:border-indigo-500 text-white rounded-lg text-xs font-bold transition">
+                            Vào
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Trạng thái lượt đi -->
+                <div id="statusBanner" class="p-3 rounded-xl bg-slate-950/70 border border-slate-800 flex items-center justify-between">
                     <span class="text-xs text-slate-400 font-medium">Trạng thái:</span>
                     <span id="gameStatusText" class="font-bold text-sm text-emerald-400 flex items-center gap-2">
                         <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400"></span> Trắng đi
                     </span>
                 </div>
 
-                <!-- Game Action Buttons -->
+                <!-- Các nút hành động chính -->
                 <div class="grid grid-cols-4 gap-2 pt-1">
                     <button id="undoBtn" class="py-2.5 px-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold flex flex-col items-center justify-center gap-1.5 transition border border-slate-700 shadow-sm" title="Đi lại 1 nước">
                         <i class="fa-solid fa-rotate-left text-sm text-amber-400"></i>
@@ -274,8 +330,8 @@
                 </div>
             </div>
 
-            <!-- Notation & Move History Box -->
-            <div class="bg-slate-900/95 backdrop-blur-md rounded-2xl p-4 border border-slate-800 shadow-xl flex flex-col h-64 sm:h-72">
+            <!-- Biên bản ghi nhận nước đi -->
+            <div class="bg-slate-900/95 backdrop-blur-md rounded-2xl p-4 border border-slate-800 shadow-xl flex flex-col h-60 sm:h-64">
                 <div class="flex items-center justify-between pb-2.5 border-b border-slate-800">
                     <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
                         <i class="fa-solid fa-scroll text-emerald-400"></i> Biên Bản Nước Đi
@@ -283,13 +339,13 @@
                     <span id="moveCountBadge" class="text-[11px] font-mono px-2 py-0.5 bg-slate-850 text-slate-300 rounded-md border border-slate-700">0 nước</span>
                 </div>
                 <div id="moveLogList" class="flex-1 overflow-y-auto space-y-1 pt-2 custom-scrollbar font-mono text-xs">
-                    <div class="text-slate-500 italic text-center py-10">Bàn cờ đã sẵn sàng...</div>
+                    <div class="text-slate-500 italic text-center py-8">Bàn cờ đã sẵn sàng...</div>
                 </div>
             </div>
         </div>
     </main>
 
-    <!-- VICTORY CELEBRATION MODAL -->
+    <!-- MODAL ĂN MỪNG CHIẾN THẮNG & PHÁO HOA -->
     <div id="victoryModal" class="hidden fixed inset-0 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 z-[100] transition-all">
         <div class="bg-gradient-to-b from-slate-900 to-slate-950 border-2 border-emerald-500/70 rounded-3xl p-6 sm:p-8 max-w-md w-full text-center shadow-2xl relative overflow-hidden animate-bounce-short">
             <div class="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-300 text-slate-950 flex items-center justify-center text-4xl shadow-xl shadow-emerald-500/30 mb-5">
@@ -311,13 +367,43 @@
         </div>
     </div>
 
+    <!-- Thông báo Toast (Popup nhẹ) -->
+    <div id="toastNotification" class="fixed bottom-5 right-5 z-[110] bg-slate-850 border border-emerald-500/50 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 transition-all duration-300 transform translate-y-20 opacity-0">
+        <i class="fa-solid fa-circle-check text-emerald-400 text-lg"></i>
+        <span id="toastMsg" class="text-xs font-semibold">Đã sao chép liên kết phòng!</span>
+    </div>
+
     <script>
         /* ==========================================================
-           1. EXACT CHESS.COM 'NEO' PIECE VECTOR SVG SET
-           Matched perfectly with the reference image
+           1. CẤU HÌNH FIREBASE REALTIME DATABASE CỦA BẠN
+           ========================================================== */
+        const firebaseConfig = {
+            apiKey: "AIzaSyB0-FKFRXE3pz8mAESeyQqp6r04_GL55R8",
+            authDomain: "chess-online-c9ddb.firebaseapp.com",
+            databaseURL: "https://chess-online-c9ddb-default-rtdb.firebaseio.com",
+            projectId: "chess-online-c9ddb",
+            storageBucket: "chess-online-c9ddb.firebasestorage.app",
+            messagingSenderId: "1052190495727",
+            appId: "1:1052190495727:web:23fb5ba805843d7fae9c1a",
+            measurementId: "G-7ETSSDH6ZQ"
+        };
+
+        // Khởi tạo Firebase
+        let firebaseApp = null;
+        let database = null;
+        try {
+            firebaseApp = firebase.initializeApp(firebaseConfig);
+            database = firebase.database();
+            console.log("Firebase initialized successfully!");
+        } catch (e) {
+            console.error("Firebase init warning:", e);
+        }
+
+        /* ==========================================================
+           2. BỘ VECTOR SVG NEO ĐÚNG ẢNH MẪU CHESS.COM
            ========================================================== */
         const SVG_PIECES = {
-            // WHITE NEO PIECES (#ffffff body, bold dark #2b2b2b outline)
+            // QUÂN TRẮNG NEO (Nền trắng viền xám đậm bo tròn mềm mại)
             'wP': `<svg class="piece-svg" viewBox="0 0 100 100">
                 <ellipse cx="50" cy="85" rx="27" ry="6" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5"/>
                 <path d="M 33 85 C 33 65, 40 50, 43 45 L 57 45 C 60 50, 67 65, 67 85 Z" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5" stroke-linejoin="round"/>
@@ -364,11 +450,10 @@
                 <path d="M 28 86 C 30 68, 38 58, 41 52 L 59 52 C 62 58, 70 68, 72 86 Z" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5"/>
                 <ellipse cx="50" cy="52" rx="22" ry="5.5" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5"/>
                 <path d="M 26 50 C 24 34, 38 27, 50 27 C 62 27, 76 34, 74 50 Z" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5" stroke-linejoin="round"/>
-                <!-- Cross -->
                 <path d="M 50 10 L 50 23 M 43.5 15 L 56.5 15" fill="none" stroke="#2b2b2b" stroke-width="5" stroke-linecap="square"/>
             </svg>`,
 
-            // BLACK NEO PIECES (#3d3b37 charcoal body, bold #1e1d1b outline, matching the reference image)
+            // QUÂN ĐEN NEO (Màu chì than #3d3b37, viền đen sắc nét như ảnh mẫu)
             'bP': `<svg class="piece-svg" viewBox="0 0 100 100">
                 <ellipse cx="50" cy="85" rx="27" ry="6" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5"/>
                 <path d="M 33 85 C 33 65, 40 50, 43 45 L 57 45 C 60 50, 67 65, 67 85 Z" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5" stroke-linejoin="round"/>
@@ -415,7 +500,6 @@
                 <path d="M 28 86 C 30 68, 38 58, 41 52 L 59 52 C 62 58, 70 68, 72 86 Z" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5"/>
                 <ellipse cx="50" cy="52" rx="22" ry="5.5" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5"/>
                 <path d="M 26 50 C 24 34, 38 27, 50 27 C 62 27, 76 34, 74 50 Z" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5" stroke-linejoin="round"/>
-                <!-- Cross -->
                 <path d="M 50 10 L 50 23 M 43.5 15 L 56.5 15" fill="none" stroke="#f8fafc" stroke-width="5" stroke-linecap="square"/>
             </svg>`
         };
@@ -423,7 +507,7 @@
         const PIECE_VALUES = { 'P': 100, 'N': 320, 'B': 330, 'R': 500, 'Q': 900, 'K': 20000 };
 
         /* ==========================================================
-           2. WEB AUDIO SYNTHESIZER
+           3. BỘ TẠO ÂM THANH WEB AUDIO SYNTHESIZER
            ========================================================== */
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         let soundEnabled = true;
@@ -445,12 +529,11 @@
             } catch (e) {}
         }
 
-        // Distinct Warning Ping for Check
         function playCheckAlertAudio() {
             if (!soundEnabled) return;
-            playSoundTone(784, 'sawtooth', 0.12, 0.22); // G5
+            playSoundTone(784, 'sawtooth', 0.12, 0.25);
             setTimeout(() => {
-                playSoundTone(987.77, 'square', 0.25, 0.25); // B5 Urgent ping
+                playSoundTone(987.77, 'square', 0.25, 0.28);
             }, 90);
         }
 
@@ -458,9 +541,9 @@
             if (isCheck) {
                 playCheckAlertAudio();
             } else if (isCapture) {
-                playSoundTone(240, 'square', 0.09, 0.18);
+                playSoundTone(240, 'square', 0.09, 0.2);
             } else {
-                playSoundTone(390, 'sine', 0.06, 0.14);
+                playSoundTone(390, 'sine', 0.06, 0.15);
             }
         }
 
@@ -480,12 +563,13 @@
         }
 
         /* ==========================================================
-           3. CANVAS FIREWORKS PARTICLE CELEBRATION
+           4. HIỆU ỨNG PHÁO HOA CANVAS (FIREWORKS PARTICLES)
            ========================================================== */
         const canvas = document.getElementById('fireworksCanvas');
         const ctx = canvas.getContext('2d');
         let fireworksActive = false;
         let particles = [];
+        let fireworkTimer = null;
 
         function resizeCanvas() {
             canvas.width = window.innerWidth;
@@ -534,7 +618,6 @@
             }
         }
 
-        let fireworkTimer = null;
         function startFireworks() {
             fireworksActive = true;
             particles = [];
@@ -573,9 +656,8 @@
             }
             requestAnimationFrame(animateFireworks);
         }
-
         /* ==========================================================
-           4. CHESS CORE & VALIDATION LOGIC
+           5. QUY TẮC VÀ LOGIC CỜ VUA CHUẨN
            ========================================================== */
         function getStartingBoard() {
             return [
@@ -597,9 +679,14 @@
         let moveHistory = [];
         let capturedWhite = [];
         let capturedBlack = [];
-        let gameMode = 'ai';
+        let gameMode = 'ai'; // 'ai', 'pass', 'online'
         let boardFlipped = false;
         let isGameOver = false;
+
+        // Trạng thái chơi Online
+        let currentRoomId = null;
+        let myOnlineRole = null; // 'w' hoặc 'b'
+        let roomFirebaseRef = null;
 
         function isInside(r, c) {
             return r >= 0 && r < 8 && c >= 0 && c < 8;
@@ -625,7 +712,7 @@
                 return false;
             };
 
-            // PAWN
+            // TỐT (Pawn)
             if (type === 'P') {
                 const dir = (color === 'w') ? -1 : 1;
                 const startRow = (color === 'w') ? 6 : 1;
@@ -643,7 +730,7 @@
                 }
             }
 
-            // KNIGHT
+            // MÃ (Knight)
             if (type === 'N') {
                 const knightOffsets = [
                     [-2, -1], [-2, 1], [-1, -2], [-1, 2],
@@ -652,7 +739,7 @@
                 for (let [dr, dc] of knightOffsets) addMove(r + dr, c + dc);
             }
 
-            // BISHOP & QUEEN
+            // TƯỢNG (Bishop) & HẬU (Queen chéo)
             if (type === 'B' || type === 'Q') {
                 const directions = [[-1, -1], [-1, 1], [1, -1], [1, 1]];
                 for (let [dr, dc] of directions) {
@@ -665,7 +752,7 @@
                 }
             }
 
-            // ROOK & QUEEN
+            // XE (Rook) & HẬU (Queen thẳng)
             if (type === 'R' || type === 'Q') {
                 const directions = [[-1, 0], [1, 0], [0, -1], [0, 1]];
                 for (let [dr, dc] of directions) {
@@ -678,7 +765,7 @@
                 }
             }
 
-            // KING
+            // VUA (King)
             if (type === 'K') {
                 const kingOffsets = [
                     [-1, -1], [-1, 0], [-1, 1],
@@ -753,9 +840,12 @@
             return moves;
         }
 
-        function executeMove(fromR, fromC, toR, toC) {
+        // Thực hiện nước đi trên bàn cờ
+        function executeMove(fromR, fromC, toR, toC, isFromSync = false) {
             const movingPiece = board[fromR][fromC];
             const capturedPiece = board[toR][toC];
+            if (!movingPiece) return;
+
             const color = movingPiece[0];
 
             board[toR][toC] = movingPiece;
@@ -793,6 +883,20 @@
             checkEndGameStatus();
             render();
 
+            // Nếu là nước đi từ người dùng (không phải do nhận sync) và đang chơi Online -> Đồng bộ lên Firebase
+            if (!isFromSync && gameMode === 'online' && currentRoomId && roomFirebaseRef) {
+                roomFirebaseRef.update({
+                    lastMove: {
+                        fromR, fromC, toR, toC,
+                        color,
+                        promoted,
+                        timestamp: Date.now()
+                    },
+                    turn: turn
+                });
+            }
+
+            // AI di chuyển nếu chơi chế độ Đấu Máy
             if (!isGameOver && gameMode === 'ai' && turn === 'b') {
                 setTimeout(makeAIMove, 280);
             }
@@ -808,7 +912,7 @@
                 if (inCheck) {
                     showVictoryCelebration(
                         `${winner} Thắng Vẻ Vang!`,
-                        `Chiếu bí tuyệt đối! ${turn === 'w' ? 'Bên Trắng' : 'Bên Đen'} không thể di chuyển Vua.`,
+                        `Chiếu bí đối thủ tuyệt đối! Vua ${turn === 'w' ? 'Trắng' : 'Đen'} không còn lối thoát.`,
                         true
                     );
                 } else {
@@ -877,9 +981,157 @@
 
             executeMove(bestMove.from.r, bestMove.from.c, bestMove.to.r, bestMove.to.c);
         }
-
         /* ==========================================================
-           5. BOARD RENDERING & CHECK HIGHLIGHTING
+           6. HỆ THỐNG ĐỒNG BỘ MULTIPLAYER FIREBASE REALTIME
+           ========================================================== */
+        function showToast(msg) {
+            const toast = document.getElementById('toastNotification');
+            document.getElementById('toastMsg').innerText = msg;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+
+        function createOnlineRoom() {
+            if (!database) {
+                showToast("Firebase chưa được khởi tạo!");
+                return;
+            }
+
+            const roomId = Math.random().toString(36).substring(2, 8).toUpperCase();
+            currentRoomId = roomId;
+            myOnlineRole = 'w'; // Chủ phòng cầm Trắng
+            boardFlipped = false; // Người chơi Trắng nhìn từ dưới lên
+
+            roomFirebaseRef = database.ref('chess_rooms/' + roomId);
+            roomFirebaseRef.set({
+                roomId: roomId,
+                status: 'waiting',
+                whitePlayer: 'Host',
+                blackPlayer: null,
+                lastMove: null,
+                turn: 'w',
+                created: Date.now()
+            });
+
+            setupOnlineRoomUI(roomId, 'w');
+            listenToOnlineRoom(roomId);
+
+            const shareUrl = `${window.location.origin}${window.location.pathname}?room=${roomId}`;
+            navigator.clipboard ? navigator.clipboard.writeText(shareUrl) : null;
+            showToast(`Đã tạo phòng ${roomId}! Link đã sao chép.`);
+        }
+
+        function joinOnlineRoom(roomId) {
+            if (!database) {
+                showToast("Firebase chưa được khởi tạo!");
+                return;
+            }
+
+            roomId = roomId.trim().toUpperCase();
+            currentRoomId = roomId;
+            myOnlineRole = 'b'; // Người vào phòng cầm Đen
+            boardFlipped = true; // Tự động xoay bàn cờ cho bên Đen
+
+            roomFirebaseRef = database.ref('chess_rooms/' + roomId);
+            roomFirebaseRef.update({
+                blackPlayer: 'Guest',
+                status: 'playing'
+            });
+
+            setupOnlineRoomUI(roomId, 'b');
+            listenToOnlineRoom(roomId);
+            showToast(`Đã tham gia phòng ${roomId}! Bạn cầm Đen.`);
+        }
+
+        function setupOnlineRoomUI(roomId, role) {
+            document.getElementById('onlineRoomBar').classList.remove('hidden');
+            document.getElementById('displayRoomCode').innerText = roomId;
+            document.getElementById('displayPlayerRole').innerText = role === 'w' ? 'Bạn: Cầm Trắng ⚪' : 'Bạn: Cầm Đen ⚫';
+
+            const connText = document.getElementById('connText');
+            connText.innerText = `Online: Phòng ${roomId}`;
+
+            // Cập nhật tên người chơi hiển thị
+            if (role === 'w') {
+                document.getElementById('bottomPlayerName').innerHTML = 'Bạn (Trắng) <span class="text-[10px] px-1.5 py-0.5 bg-emerald-500/20 text-emerald-300 rounded font-mono">Chủ phòng</span>';
+                document.getElementById('topPlayerName').innerHTML = 'Đối thủ Online (Đen) <span class="text-[10px] px-1.5 py-0.5 bg-indigo-500/20 text-indigo-300 rounded font-mono">Khách</span>';
+                document.getElementById('topPlayerIcon').className = 'fa-solid fa-user-ninja text-lg text-indigo-400';
+            } else {
+                document.getElementById('bottomPlayerName').innerHTML = 'Bạn (Đen) <span class="text-[10px] px-1.5 py-0.5 bg-indigo-500/20 text-indigo-300 rounded font-mono">Khách</span>';
+                document.getElementById('topPlayerName').innerHTML = 'Chủ phòng (Trắng) <span class="text-[10px] px-1.5 py-0.5 bg-emerald-500/20 text-emerald-300 rounded font-mono">Chủ phòng</span>';
+                document.getElementById('topPlayerIcon').className = 'fa-solid fa-user-tie text-lg text-emerald-400';
+            }
+
+            resetGameCoreState();
+        }
+
+        function listenToOnlineRoom(roomId) {
+            if (!roomFirebaseRef) return;
+
+            roomFirebaseRef.on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (!data) return;
+
+                // Nếu đối thủ đầu hàng
+                if (data.resignedBy) {
+                    if (!isGameOver) {
+                        isGameOver = true;
+                        const winner = data.resignedBy === 'w' ? 'Bên Đen' : 'Bên Trắng';
+                        showVictoryCelebration(
+                            `${winner} Thắng Cuộc!`,
+                            `Đối thủ đã xin đầu hàng trận đấu!`,
+                            true
+                        );
+                    }
+                    return;
+                }
+
+                // Nếu đối thủ vừa đi nước cờ mới
+                if (data.lastMove && data.lastMove.color !== myOnlineRole) {
+                    const lm = data.lastMove;
+                    // Kiểm tra xem nước này đã được thực hiện ở máy mình chưa
+                    const lastHistory = moveHistory[moveHistory.length - 1];
+                    const isNewMove = !lastHistory || 
+                        lastHistory.from.r !== lm.fromR || 
+                        lastHistory.from.c !== lm.fromC || 
+                        lastHistory.to.r !== lm.toR || 
+                        lastHistory.to.c !== lm.toC;
+
+                    if (isNewMove) {
+                        executeMove(lm.fromR, lm.fromC, lm.toR, lm.toC, true);
+                    }
+                }
+            });
+        }
+
+        function leaveOnlineRoom() {
+            if (roomFirebaseRef) {
+                roomFirebaseRef.off();
+                roomFirebaseRef = null;
+            }
+            currentRoomId = null;
+            myOnlineRole = null;
+            document.getElementById('onlineRoomBar').classList.add('hidden');
+            document.getElementById('connText').innerText = "Chế độ Offline / AI";
+            setMode('ai');
+            showToast("Đã rời phòng chơi Online!");
+        }
+
+        // Tự động vào phòng nếu trên URL có tham số ?room=XXXXXX
+        function checkUrlForRoom() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const roomCode = urlParams.get('room');
+            if (roomCode) {
+                setMode('online');
+                setTimeout(() => {
+                    joinOnlineRoom(roomCode);
+                }, 350);
+            }
+        }
+        /* ==========================================================
+           7. VẼ BÀN CỜ VÀ GIAO DIỆN
            ========================================================== */
         const boardEl = document.getElementById('chessboard');
 
@@ -890,7 +1142,7 @@
             const checkedKingPos = inCheck ? findKing(turn) : null;
             const cols = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
 
-            // Update floating Check alert banner
+            // Cập nhật banner cảnh báo chiếu
             const checkAlertBanner = document.getElementById('checkAlertBanner');
             const checkAlertText = document.getElementById('checkAlertText');
             if (inCheck && !isGameOver) {
@@ -911,7 +1163,7 @@
                     square.dataset.row = r;
                     square.dataset.col = c;
 
-                    // Rank & File labels
+                    // Tọa độ hàng (1-8) và cột (a-h)
                     if (j === 0) {
                         const rankLabel = document.createElement('span');
                         rankLabel.className = `coord-label top-1 left-1.5 ${isDark ? 'text-[#eeeed2]/85' : 'text-[#769656]/90'}`;
@@ -925,23 +1177,23 @@
                         square.appendChild(fileLabel);
                     }
 
-                    // Selected square
+                    // Ô được chọn
                     if (selectedSquare && selectedSquare.r === r && selectedSquare.c === c) {
                         square.classList.add('square-selected');
                     }
 
-                    // Previous move highlight
+                    // Highlight nước đi vừa qua
                     if (lastMove && ((lastMove.from.r === r && lastMove.from.c === c) || (lastMove.to.r === r && lastMove.to.c === c))) {
                         square.classList.add('square-prev');
                     }
 
-                    // CHECK GLOW EFFECT ON KING SQUARE
+                    // HIỆU ỨNG VÒNG ĐỎ CHIẾU TƯỚNG
                     const isKingCheckedSquare = checkedKingPos && checkedKingPos.r === r && checkedKingPos.c === c;
                     if (isKingCheckedSquare) {
                         square.classList.add('square-check-glow');
                     }
 
-                    // Piece Rendering
+                    // Render quân cờ
                     const piece = board[r][c];
                     if (piece) {
                         const pieceWrapper = document.createElement('div');
@@ -953,7 +1205,7 @@
                         square.appendChild(pieceWrapper);
                     }
 
-                    // Move & capture hints
+                    // Chấm gợi ý nước đi
                     const isTargetMove = validMoves.some(m => m.r === r && m.c === c);
                     if (isTargetMove) {
                         const hint = document.createElement('div');
@@ -971,7 +1223,17 @@
 
         function handleSquareClick(r, c) {
             if (isGameOver) return;
+
+            // Chặn khi đấu với AI và đang là lượt AI
             if (gameMode === 'ai' && turn === 'b') return;
+
+            // Chặn khi chơi Online: chỉ được đi quân của màu mình và khi đúng lượt của mình
+            if (gameMode === 'online') {
+                if (myOnlineRole !== turn) {
+                    showToast("Đang là lượt đi của đối thủ!");
+                    return;
+                }
+            }
 
             const clickedPiece = board[r][c];
 
@@ -985,7 +1247,12 @@
                 }
             }
 
+            // Chỉ cho phép chọn quân nếu đúng màu đang tới lượt
             if (clickedPiece && clickedPiece[0] === turn) {
+                // Nếu chơi online thì quân đó phải là quân của người chơi
+                if (gameMode === 'online' && clickedPiece[0] !== myOnlineRole) {
+                    return;
+                }
                 selectedSquare = { r, c };
                 validMoves = getLegalMoves(r, c);
                 playSoundTone(480, 'sine', 0.05, 0.1);
@@ -1021,17 +1288,17 @@
                 topBadge.className = !isWhiteTurn ? 'text-xs px-3 py-1 rounded-full font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : 'text-xs px-3 py-1 rounded-full font-semibold bg-slate-800 text-slate-400 border border-slate-700';
             }
 
-            // Render Captured Pieces
+            // Danh sách quân bị ăn
             const renderCapturedList = (list) => list.map(p => `<span class="inline-block w-5 h-5 drop-shadow-sm">${SVG_PIECES[p]}</span>`).join('');
             document.getElementById('whiteCaptures').innerHTML = renderCapturedList(capturedWhite);
             document.getElementById('blackCaptures').innerHTML = renderCapturedList(capturedBlack);
 
-            // History Log Table
+            // Bảng nước đi
             const historyList = document.getElementById('moveLogList');
             document.getElementById('moveCountBadge').innerText = `${moveHistory.length} nước`;
 
             if (moveHistory.length === 0) {
-                historyList.innerHTML = '<div class="text-slate-500 italic text-center py-10">Bàn cờ đã sẵn sàng...</div>';
+                historyList.innerHTML = '<div class="text-slate-500 italic text-center py-8">Bàn cờ đã sẵn sàng...</div>';
             } else {
                 let html = '<table class="w-full text-left">';
                 for (let i = 0; i < moveHistory.length; i += 2) {
@@ -1040,9 +1307,9 @@
                     const blackMove = moveHistory[i + 1];
                     html += `
                         <tr class="border-b border-slate-800/60 hover:bg-slate-800/40 transition">
-                            <td class="py-1.5 text-slate-500 w-8 pl-1 font-semibold">${moveNum}.</td>
-                            <td class="py-1.5 font-bold text-slate-100">${whiteMove ? whiteMove.notation : ''}</td>
-                            <td class="py-1.5 font-bold text-emerald-400">${blackMove ? blackMove.notation : ''}</td>
+                            <td class="py-1 text-slate-500 w-8 pl-1 font-semibold">${moveNum}.</td>
+                            <td class="py-1 font-bold text-slate-100">${whiteMove ? whiteMove.notation : ''}</td>
+                            <td class="py-1 font-bold text-emerald-400">${blackMove ? blackMove.notation : ''}</td>
                         </tr>
                     `;
                 }
@@ -1052,51 +1319,149 @@
             }
         }
 
+        function resetGameCoreState() {
+            board = getStartingBoard();
+            turn = 'w';
+            selectedSquare = null;
+            validMoves = [];
+            moveHistory = [];
+            capturedWhite = [];
+            capturedBlack = [];
+            isGameOver = false;
+            stopFireworks();
+            document.getElementById('victoryModal').classList.add('hidden');
+            document.getElementById('checkAlertBanner').classList.add('hidden');
+            render();
+        }
+
+        function setMode(mode) {
+            gameMode = mode;
+            const modeAiBtn = document.getElementById('modeAiBtn');
+            const modePassBtn = document.getElementById('modePassBtn');
+            const modeOnlineBtn = document.getElementById('modeOnlineBtn');
+            const onlineControls = document.getElementById('onlineControlsBox');
+            const activeModeText = document.getElementById('activeModeText');
+
+            const activeClass = 'px-2 py-2 rounded-xl text-xs font-bold border border-emerald-500/80 bg-emerald-500/20 text-emerald-300 flex flex-col items-center justify-center gap-1 transition shadow-sm';
+            const inactiveClass = 'px-2 py-2 rounded-xl text-xs font-bold border border-slate-700 bg-slate-800/60 text-slate-400 hover:bg-slate-800 hover:text-slate-200 flex flex-col items-center justify-center gap-1 transition';
+
+            modeAiBtn.className = inactiveClass;
+            modePassBtn.className = inactiveClass;
+            modeOnlineBtn.className = inactiveClass;
+            onlineControls.classList.add('hidden');
+
+            if (mode === 'ai') {
+                modeAiBtn.className = activeClass;
+                activeModeText.innerText = "ĐẤU MÁY (AI)";
+                boardFlipped = false;
+                document.getElementById('topPlayerName').innerHTML = 'AI Bot (Đen) <span class="text-[10px] px-1.5 py-0.5 bg-slate-700 rounded text-slate-300 font-mono">1550 ELO</span>';
+                document.getElementById('topPlayerIcon').className = 'fa-solid fa-robot text-lg text-indigo-400';
+                document.getElementById('bottomPlayerName').innerHTML = 'Bạn (Trắng) <span class="text-[10px] px-1.5 py-0.5 bg-emerald-500/20 text-emerald-300 rounded font-mono">Chủ phòng</span>';
+                resetGameCoreState();
+            } else if (mode === 'pass') {
+                modePassBtn.className = activeClass;
+                activeModeText.innerText = "2 NGƯỜI CHƠI";
+                boardFlipped = false;
+                document.getElementById('topPlayerName').innerHTML = 'Người Chơi 2 (Đen) <span class="text-[10px] px-1.5 py-0.5 bg-slate-700 rounded text-slate-300 font-mono">Khách</span>';
+                document.getElementById('topPlayerIcon').className = 'fa-solid fa-user text-lg text-emerald-400';
+                document.getElementById('bottomPlayerName').innerHTML = 'Người Chơi 1 (Trắng) <span class="text-[10px] px-1.5 py-0.5 bg-emerald-500/20 text-emerald-300 rounded font-mono">Chủ phòng</span>';
+                resetGameCoreState();
+            } else if (mode === 'online') {
+                modeOnlineBtn.className = activeClass;
+                activeModeText.innerText = "ONLINE REALTIME";
+                onlineControls.classList.remove('hidden');
+            }
+        }
         /* ==========================================================
-           6. CONTROLS INITIALIZATION
+           8. KHỞI TẠO NÚT BẤM & SỰ KIỆN
            ========================================================== */
         function initControls() {
-            const resetGame = () => {
-                board = getStartingBoard();
-                turn = 'w';
-                selectedSquare = null;
-                validMoves = [];
-                moveHistory = [];
-                capturedWhite = [];
-                capturedBlack = [];
-                isGameOver = false;
-                stopFireworks();
-                document.getElementById('victoryModal').classList.add('hidden');
-                document.getElementById('checkAlertBanner').classList.add('hidden');
-                render();
-            };
+            document.getElementById('modeAiBtn').addEventListener('click', () => setMode('ai'));
+            document.getElementById('modePassBtn').addEventListener('click', () => setMode('pass'));
+            document.getElementById('modeOnlineBtn').addEventListener('click', () => setMode('online'));
 
-            document.getElementById('newGameBtn').addEventListener('click', resetGame);
-            document.getElementById('modalNewGameBtn').addEventListener('click', resetGame);
+            document.getElementById('createRoomBtn').addEventListener('click', createOnlineRoom);
+            document.getElementById('joinRoomBtn').addEventListener('click', () => {
+                const code = document.getElementById('joinRoomInput').value;
+                if (code.trim()) joinOnlineRoom(code);
+            });
+
+            document.getElementById('copyRoomLinkBtn').addEventListener('click', () => {
+                if (currentRoomId) {
+                    const shareUrl = `${window.location.origin}${window.location.pathname}?room=${currentRoomId}`;
+                    if (navigator.clipboard) {
+                        navigator.clipboard.writeText(shareUrl);
+                    } else {
+                        const tempInput = document.createElement("input");
+                        tempInput.value = shareUrl;
+                        document.body.appendChild(tempInput);
+                        tempInput.select();
+                        document.execCommand("copy");
+                        document.body.removeChild(tempInput);
+                    }
+                    showToast("Đã sao chép liên kết phòng mời bạn bè!");
+                }
+            });
+
+            document.getElementById('leaveRoomBtn').addEventListener('click', leaveOnlineRoom);
+
+            document.getElementById('newGameBtn').addEventListener('click', () => {
+                if (gameMode === 'online' && roomFirebaseRef) {
+                    roomFirebaseRef.update({
+                        lastMove: null,
+                        turn: 'w',
+                        resignedBy: null
+                    });
+                }
+                resetGameCoreState();
+            });
+
+            document.getElementById('modalNewGameBtn').addEventListener('click', () => {
+                if (gameMode === 'online' && roomFirebaseRef) {
+                    roomFirebaseRef.update({
+                        lastMove: null,
+                        turn: 'w',
+                        resignedBy: null
+                    });
+                }
+                resetGameCoreState();
+            });
+
             document.getElementById('closeModalBtn').addEventListener('click', () => {
                 document.getElementById('victoryModal').classList.add('hidden');
             });
 
-            // Resign
+            // Đầu hàng (Resign)
             document.getElementById('resignBtn').addEventListener('click', () => {
                 if (isGameOver) return;
                 isGameOver = true;
                 const winner = turn === 'w' ? 'Bên Đen' : 'Bên Trắng';
+
+                if (gameMode === 'online' && roomFirebaseRef) {
+                    roomFirebaseRef.update({
+                        resignedBy: myOnlineRole
+                    });
+                }
+
                 showVictoryCelebration(
                     `${winner} Thắng Cuộc!`,
-                    `Đối thủ đã xin đầu hàng. Trận đấu kết thúc!`,
+                    `Một bên đã xin đầu hàng. Ván đấu kết thúc!`,
                     true
                 );
             });
 
-            // Flip Board
+            // Xoay bàn cờ thủ công
             document.getElementById('flipBtn').addEventListener('click', () => {
                 boardFlipped = !boardFlipped;
                 render();
             });
 
-            // Undo
+            // Đi lại (Undo) - Không áp dụng trong chế độ Online
             document.getElementById('undoBtn').addEventListener('click', () => {
+                if (gameMode === 'online') {
+                    showToast("Không thể đi lại khi đấu Online!");
+                    return;
+                }
                 if (moveHistory.length === 0 || isGameOver) return;
                 const stepsToUndo = (gameMode === 'ai' && moveHistory.length >= 2 && turn === 'w') ? 2 : 1;
                 
@@ -1120,31 +1485,7 @@
                 playSoundTone(300, 'sine', 0.1);
             });
 
-            // Mode Select
-            const modeAiBtn = document.getElementById('modeAiBtn');
-            const modePassBtn = document.getElementById('modePassBtn');
-            const topName = document.getElementById('topPlayerName');
-            const topIcon = document.getElementById('topPlayerIcon');
-
-            modeAiBtn.addEventListener('click', () => {
-                gameMode = 'ai';
-                modeAiBtn.className = 'px-3 py-2.5 rounded-xl text-xs sm:text-sm font-bold border border-emerald-500/80 bg-emerald-500/15 text-emerald-300 flex items-center justify-center gap-2 transition shadow-sm';
-                modePassBtn.className = 'px-3 py-2.5 rounded-xl text-xs sm:text-sm font-bold border border-slate-700 bg-slate-800/60 text-slate-400 hover:bg-slate-800 hover:text-slate-200 flex items-center justify-center gap-2 transition';
-                topName.innerHTML = 'AI Bot (Đen) <span class="text-[10px] px-1.5 py-0.5 bg-slate-700 rounded text-slate-300 font-mono">1550 ELO</span>';
-                topIcon.className = 'fa-solid fa-robot text-lg text-indigo-400';
-                resetGame();
-            });
-
-            modePassBtn.addEventListener('click', () => {
-                gameMode = 'pass';
-                modePassBtn.className = 'px-3 py-2.5 rounded-xl text-xs sm:text-sm font-bold border border-emerald-500/80 bg-emerald-500/15 text-emerald-300 flex items-center justify-center gap-2 transition shadow-sm';
-                modeAiBtn.className = 'px-3 py-2.5 rounded-xl text-xs sm:text-sm font-bold border border-slate-700 bg-slate-800/60 text-slate-400 hover:bg-slate-800 hover:text-slate-200 flex items-center justify-center gap-2 transition';
-                topName.innerHTML = 'Người Chơi 2 (Đen) <span class="text-[10px] px-1.5 py-0.5 bg-slate-700 rounded text-slate-300 font-mono">Đối thủ</span>';
-                topIcon.className = 'fa-solid fa-user text-lg text-emerald-400';
-                resetGame();
-            });
-
-            // Sound Button
+            // Nút âm thanh
             const soundBtn = document.getElementById('soundToggleBtn');
             const soundIcon = document.getElementById('soundIcon');
             soundBtn.addEventListener('click', () => {
@@ -1160,6 +1501,7 @@
         window.addEventListener('DOMContentLoaded', () => {
             initControls();
             render();
+            checkUrlForRoom();
         });
     </script>
 </body>
