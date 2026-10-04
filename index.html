@@ -1,14 +1,17 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chess Master - Online by Hoa thanh quế</title>
+    <title>Chess Master - make by hoa thanh quế</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
-    
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap"
+        rel="stylesheet">
+
     <!-- Firebase SDK Compat Version (Chạy trực tiếp 100% trên trình duyệt và GitHub Pages) -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -18,6 +21,7 @@
         .square-light {
             background-color: #eeeed2;
         }
+
         .square-dark {
             background-color: #769656;
         }
@@ -26,6 +30,7 @@
         .square-selected {
             background-color: #baca44 !important;
         }
+
         .square-prev {
             background-color: rgba(205, 210, 106, 0.85) !important;
         }
@@ -40,6 +45,7 @@
             0% {
                 box-shadow: inset 0 0 15px rgba(239, 68, 68, 0.8), 0 0 20px rgba(239, 68, 68, 0.6);
             }
+
             100% {
                 box-shadow: inset 0 0 30px rgba(220, 38, 38, 1), 0 0 35px rgba(239, 68, 68, 0.9);
             }
@@ -50,11 +56,27 @@
         }
 
         @keyframes king-alert-tremor {
-            0%, 100% { transform: scale(1.06) rotate(0deg); }
-            20% { transform: scale(1.09) rotate(-3.5deg); }
-            40% { transform: scale(1.09) rotate(3.5deg); }
-            60% { transform: scale(1.09) rotate(-2deg); }
-            80% { transform: scale(1.09) rotate(2deg); }
+
+            0%,
+            100% {
+                transform: scale(1.06) rotate(0deg);
+            }
+
+            20% {
+                transform: scale(1.09) rotate(-3.5deg);
+            }
+
+            40% {
+                transform: scale(1.09) rotate(3.5deg);
+            }
+
+            60% {
+                transform: scale(1.09) rotate(-2deg);
+            }
+
+            80% {
+                transform: scale(1.09) rotate(2deg);
+            }
         }
 
         /* Thiết kế quân cờ */
@@ -112,8 +134,15 @@
         }
 
         @keyframes pulse-capture {
-            0% { transform: scale(0.96); opacity: 0.7; }
-            100% { transform: scale(1.03); opacity: 1; }
+            0% {
+                transform: scale(0.96);
+                opacity: 0.7;
+            }
+
+            100% {
+                transform: scale(1.03);
+                opacity: 1;
+            }
         }
 
         .coord-label {
@@ -136,37 +165,111 @@
         .custom-scrollbar::-webkit-scrollbar {
             width: 5px;
         }
+
         .custom-scrollbar::-webkit-scrollbar-thumb {
             background-color: #334155;
             border-radius: 9999px;
         }
+
+        /* ==== ĐỒNG HỒ ĐẾM NGƯỢC ==== */
+        .clock-box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 8px 14px;
+            border-radius: 12px;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            font-size: 1.05rem;
+            letter-spacing: 0.5px;
+            transition: all 0.25s ease;
+            border: 1.5px solid rgba(100, 116, 139, 0.5);
+            background: rgba(15, 23, 42, 0.7);
+            color: #cbd5e1;
+            min-width: 110px;
+            user-select: none;
+        }
+
+        .clock-box.active {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(20, 184, 166, 0.15));
+            border-color: rgba(16, 185, 129, 0.8);
+            color: #6ee7b7;
+            box-shadow: 0 0 18px rgba(16, 185, 129, 0.35), inset 0 0 8px rgba(16, 185, 129, 0.15);
+            transform: scale(1.04);
+        }
+
+        .clock-box.low-time {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.3), rgba(220, 38, 38, 0.2));
+            border-color: rgba(239, 68, 68, 0.9);
+            color: #fca5a5;
+            animation: clock-pulse 1s infinite alternate;
+        }
+
+        .clock-box.active.low-time {
+            animation: clock-pulse 0.7s infinite alternate;
+        }
+
+        @keyframes clock-pulse {
+            0% {
+                box-shadow: 0 0 12px rgba(239, 68, 68, 0.5);
+            }
+
+            100% {
+                box-shadow: 0 0 28px rgba(239, 68, 68, 0.95), inset 0 0 10px rgba(239, 68, 68, 0.3);
+            }
+        }
+
+        .clock-icon {
+            font-size: 0.9rem;
+            opacity: 0.85;
+        }
+
+        .clock-time {
+            font-variant-numeric: tabular-nums;
+        }
+
+        .clock-badge-flag {
+            font-size: 0.75rem;
+            opacity: 0.85;
+        }
     </style>
 </head>
-<body class="bg-gradient-to-br from-[#111417] via-[#181d23] to-[#0d1013] text-slate-100 min-h-screen flex flex-col font-['Plus_Jakarta_Sans',sans-serif] selection:bg-emerald-500 selection:text-black relative overflow-x-hidden">
+
+<body
+    class="bg-gradient-to-br from-[#111417] via-[#181d23] to-[#0d1013] text-slate-100 min-h-screen flex flex-col font-['Plus_Jakarta_Sans',sans-serif] selection:bg-emerald-500 selection:text-black relative overflow-x-hidden">
 
     <!-- Canvas Pháo hoa toàn màn hình -->
     <canvas id="fireworksCanvas"></canvas>
 
     <!-- Header điều hướng -->
-    <header class="w-full max-w-6xl mx-auto px-4 py-3 flex items-center justify-between border-b border-slate-800/80 backdrop-blur-md">
+    <header
+        class="w-full max-w-6xl mx-auto px-4 py-3 flex items-center justify-between border-b border-slate-800/80 backdrop-blur-md">
         <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-[#769656] flex items-center justify-center shadow-lg shadow-emerald-900/30 text-white text-xl font-bold">
+            <div
+                class="w-10 h-10 rounded-xl bg-[#769656] flex items-center justify-center shadow-lg shadow-emerald-900/30 text-white text-xl font-bold">
                 <i class="fa-solid fa-chess-knight"></i>
             </div>
             <div>
                 <h1 class="text-xl md:text-2xl font-black tracking-tight text-white flex items-center gap-2">
-                    Chess Master <span class="text-[10px] uppercase font-bold tracking-wider bg-emerald-500/20 text-emerald-400 px-2.5 py-0.5 rounded-full border border-emerald-500/30">Neo Live</span>
+                    Chess Master <span
+                        class="text-[10px] uppercase font-bold tracking-wider bg-emerald-500/20 text-emerald-400 px-2.5 py-0.5 rounded-full border border-emerald-500/30">Neo
+                        Live</span>
                 </h1>
-                <p class="text-xs text-slate-400 hidden sm:block">Make by Hoa Thanh Quế</p>
+                <p class="text-xs text-slate-400 hidden sm:block">Make by hoa thanh quế
+                </p>
             </div>
         </div>
 
         <div class="flex items-center gap-2.5">
-            <div id="connectionStatusBadge" class="hidden sm:flex items-center gap-2 text-xs bg-slate-800/90 px-3.5 py-2 rounded-xl border border-slate-700/60 text-slate-300 font-medium">
+            <div id="connectionStatusBadge"
+                class="hidden sm:flex items-center gap-2 text-xs bg-slate-800/90 px-3.5 py-2 rounded-xl border border-slate-700/60 text-slate-300 font-medium">
                 <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" id="connDot"></span>
                 <span id="connText">Chế độ Offline / AI</span>
             </div>
-            <button id="soundToggleBtn" class="p-2.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 transition border border-slate-700/60 shadow-sm" title="Bật/Tắt âm thanh">
+            <button id="soundToggleBtn"
+                class="p-2.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 transition border border-slate-700/60 shadow-sm"
+                title="Bật/Tắt âm thanh">
                 <i class="fa-solid fa-volume-high text-base text-emerald-400" id="soundIcon"></i>
             </button>
         </div>
@@ -174,7 +277,8 @@
 
     <!-- Banner Cảnh báo Chiếu tướng -->
     <div id="checkAlertBanner" class="hidden w-full max-w-md mx-auto px-4 mt-2 transition-all duration-300">
-        <div class="bg-rose-600/95 text-white font-extrabold text-sm py-2.5 px-4 rounded-xl border-2 border-rose-400 flex items-center justify-center gap-2.5 shadow-xl shadow-rose-900/50 animate-bounce">
+        <div
+            class="bg-rose-600/95 text-white font-extrabold text-sm py-2.5 px-4 rounded-xl border-2 border-rose-400 flex items-center justify-center gap-2.5 shadow-xl shadow-rose-900/50 animate-bounce">
             <i class="fa-solid fa-triangle-exclamation text-amber-300 text-lg"></i>
             <span id="checkAlertText">CẢNH BÁO: VUA ĐANG BỊ CHIẾU TƯỚNG!</span>
         </div>
@@ -182,20 +286,26 @@
 
     <!-- Thông báo Online Room Banner -->
     <div id="onlineRoomBar" class="hidden w-full max-w-6xl mx-auto px-4 mt-2">
-        <div class="bg-gradient-to-r from-emerald-950/70 via-slate-900 to-indigo-950/70 border border-emerald-500/40 rounded-xl p-3 flex flex-wrap items-center justify-between gap-3 text-xs">
+        <div
+            class="bg-gradient-to-r from-emerald-950/70 via-slate-900 to-indigo-950/70 border border-emerald-500/40 rounded-xl p-3 flex flex-wrap items-center justify-between gap-3 text-xs">
             <div class="flex items-center gap-2">
-                <span class="bg-emerald-500/20 text-emerald-300 px-2.5 py-1 rounded-lg border border-emerald-500/30 font-bold flex items-center gap-1.5">
-                    <i class="fa-solid fa-wifi text-emerald-400"></i> Phòng: <span id="displayRoomCode" class="font-mono text-sm tracking-wider font-extrabold text-white">------</span>
+                <span
+                    class="bg-emerald-500/20 text-emerald-300 px-2.5 py-1 rounded-lg border border-emerald-500/30 font-bold flex items-center gap-1.5">
+                    <i class="fa-solid fa-wifi text-emerald-400"></i> Phòng: <span id="displayRoomCode"
+                        class="font-mono text-sm tracking-wider font-extrabold text-white">------</span>
                 </span>
-                <span id="displayPlayerRole" class="text-slate-300 font-semibold px-2 py-1 rounded bg-slate-800 border border-slate-700">
+                <span id="displayPlayerRole"
+                    class="text-slate-300 font-semibold px-2 py-1 rounded bg-slate-800 border border-slate-700">
                     Bạn: Cầm Trắng ⚪
                 </span>
             </div>
             <div class="flex items-center gap-2">
-                <button id="copyRoomLinkBtn" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg border border-slate-600 flex items-center gap-1.5 transition font-semibold">
+                <button id="copyRoomLinkBtn"
+                    class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg border border-slate-600 flex items-center gap-1.5 transition font-semibold">
                     <i class="fa-solid fa-link text-indigo-400"></i> Sao chép Link mời
                 </button>
-                <button id="leaveRoomBtn" class="px-3 py-1.5 bg-rose-900/40 hover:bg-rose-800/60 text-rose-300 rounded-lg border border-rose-600/50 flex items-center gap-1.5 transition font-semibold">
+                <button id="leaveRoomBtn"
+                    class="px-3 py-1.5 bg-rose-900/40 hover:bg-rose-800/60 text-rose-300 rounded-lg border border-rose-600/50 flex items-center gap-1.5 transition font-semibold">
                     <i class="fa-solid fa-right-from-bracket"></i> Rời phòng
                 </button>
             </div>
@@ -203,77 +313,108 @@
     </div>
 
     <!-- Khu vực chơi cờ chính -->
-    <main class="w-full max-w-6xl mx-auto px-2 sm:px-4 py-3 sm:py-4 flex-1 flex flex-col lg:flex-row items-center lg:items-start justify-center gap-6">
-        
+    <main
+        class="w-full max-w-6xl mx-auto px-2 sm:px-4 py-3 sm:py-4 flex-1 flex flex-col lg:flex-row items-center lg:items-start justify-center gap-6">
+
         <!-- Cột bàn cờ -->
         <div class="flex flex-col items-center w-full max-w-[530px]">
-            <!-- Thông tin Người chơi phía trên -->
-            <div class="w-full flex items-center justify-between bg-[#21262d] px-4 py-2.5 rounded-t-2xl border-t border-x border-slate-700/70 shadow-lg">
-                <div class="flex items-center gap-3">
-                    <div id="topPlayerAvatar" class="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center font-bold text-slate-300 border border-slate-600/80 shadow-md">
+            <!-- Thông tin Người chơi phía trên + ĐỒNG HỒ -->
+            <div
+                class="w-full flex items-center justify-between bg-[#21262d] px-4 py-2.5 rounded-t-2xl border-t border-x border-slate-700/70 shadow-lg gap-3">
+                <div class="flex items-center gap-3 min-w-0">
+                    <div id="topPlayerAvatar"
+                        class="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center font-bold text-slate-300 border border-slate-600/80 shadow-md shrink-0">
                         <i class="fa-solid fa-robot text-lg text-indigo-400" id="topPlayerIcon"></i>
                     </div>
-                    <div>
-                        <div class="text-sm font-bold flex items-center gap-2 text-slate-100" id="topPlayerName">
+                    <div class="min-w-0">
+                        <div class="text-sm font-bold flex items-center gap-2 text-slate-100 truncate"
+                            id="topPlayerName">
                             AI Bot (Đen)
-                            <span class="text-[10px] px-1.5 py-0.5 bg-slate-700 rounded text-slate-300 font-mono" id="topPlayerSub">1550 ELO</span>
+                            <span class="text-[10px] px-1.5 py-0.5 bg-slate-700 rounded text-slate-300 font-mono"
+                                id="topPlayerSub">1550 ELO</span>
                         </div>
                         <div class="flex items-center gap-1 min-h-[22px]" id="blackCaptures"></div>
                     </div>
                 </div>
-                <div id="topPlayerBadge" class="text-xs px-3 py-1 rounded-full font-semibold bg-slate-800 text-slate-400 border border-slate-700">
-                    Chờ đối thủ
+                <div class="flex items-center gap-2 shrink-0">
+                    <div id="topClock" class="clock-box">
+                        <i class="fa-solid fa-clock clock-icon"></i>
+                        <span class="clock-time" id="topClockTime">10:00</span>
+                    </div>
+                    <div id="topPlayerBadge"
+                        class="text-xs px-3 py-1 rounded-full font-semibold bg-slate-800 text-slate-400 border border-slate-700 hidden sm:block">
+                        Chờ đối thủ
+                    </div>
                 </div>
             </div>
 
             <!-- Bàn cờ 8x8 -->
-            <div class="relative w-full aspect-square bg-[#262522] p-2 sm:p-2.5 shadow-2xl border-x border-slate-700/70">
-                <div id="chessboard" class="w-full h-full grid grid-cols-8 grid-rows-8 rounded-sm overflow-hidden border border-black/40 shadow-inner select-none relative">
+            <div
+                class="relative w-full aspect-square bg-[#262522] p-2 sm:p-2.5 shadow-2xl border-x border-slate-700/70">
+                <div id="chessboard"
+                    class="w-full h-full grid grid-cols-8 grid-rows-8 rounded-sm overflow-hidden border border-black/40 shadow-inner select-none relative">
                     <!-- 64 ô cờ render bằng JavaScript -->
                 </div>
             </div>
 
-            <!-- Thông tin Người chơi phía dưới -->
-            <div class="w-full flex items-center justify-between bg-[#21262d] px-4 py-2.5 rounded-b-2xl border-b border-x border-slate-700/70 shadow-lg">
-                <div class="flex items-center gap-3">
-                    <div id="bottomPlayerAvatar" class="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center font-bold text-emerald-400 shadow-md">
+            <!-- Thông tin Người chơi phía dưới + ĐỒNG HỒ -->
+            <div
+                class="w-full flex items-center justify-between bg-[#21262d] px-4 py-2.5 rounded-b-2xl border-b border-x border-slate-700/70 shadow-lg gap-3">
+                <div class="flex items-center gap-3 min-w-0">
+                    <div id="bottomPlayerAvatar"
+                        class="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center font-bold text-emerald-400 shadow-md shrink-0">
                         <i class="fa-solid fa-user text-lg" id="bottomPlayerIcon"></i>
                     </div>
-                    <div>
-                        <div class="text-sm font-bold flex items-center gap-2 text-slate-100" id="bottomPlayerName">
+                    <div class="min-w-0">
+                        <div class="text-sm font-bold flex items-center gap-2 text-slate-100 truncate"
+                            id="bottomPlayerName">
                             Bạn (Trắng)
-                            <span class="text-[10px] px-1.5 py-0.5 bg-emerald-500/20 text-emerald-300 rounded border border-emerald-500/30 font-mono" id="bottomPlayerSub">Chủ phòng</span>
+                            <span
+                                class="text-[10px] px-1.5 py-0.5 bg-emerald-500/20 text-emerald-300 rounded border border-emerald-500/30 font-mono"
+                                id="bottomPlayerSub">Chủ phòng</span>
                         </div>
                         <div class="flex items-center gap-1 min-h-[22px]" id="whiteCaptures"></div>
                     </div>
                 </div>
-                <div id="bottomPlayerBadge" class="text-xs px-3 py-1 rounded-full font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
-                    Lượt của bạn
+                <div class="flex items-center gap-2 shrink-0">
+                    <div id="bottomClock" class="clock-box">
+                        <i class="fa-solid fa-clock clock-icon"></i>
+                        <span class="clock-time" id="bottomClockTime">10:00</span>
+                    </div>
+                    <div id="bottomPlayerBadge"
+                        class="text-xs px-3 py-1 rounded-full font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 hidden sm:block">
+                        Lượt của bạn
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Sidebar / Điều khiển & Lịch sử -->
         <div class="w-full max-w-[530px] lg:w-80 flex flex-col gap-4">
-            
+
             <!-- Hộp chọn chế độ và kết nối Online -->
             <div class="bg-slate-900/95 backdrop-blur-md rounded-2xl p-4 border border-slate-800 shadow-xl space-y-3.5">
                 <div>
-                    <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center justify-between">
+                    <div
+                        class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center justify-between">
                         <span>Chế độ chơi</span>
-                        <span id="activeModeText" class="text-[10px] text-emerald-400 font-bold font-mono">ĐẤU MÁY (AI)</span>
+                        <span id="activeModeText" class="text-[10px] text-emerald-400 font-bold font-mono">ĐẤU MÁY
+                            (AI)</span>
                     </div>
-                    
+
                     <div class="grid grid-cols-3 gap-1.5">
-                        <button id="modeAiBtn" class="px-2 py-2 rounded-xl text-xs font-bold border border-emerald-500/80 bg-emerald-500/20 text-emerald-300 flex flex-col items-center justify-center gap-1 transition shadow-sm">
+                        <button id="modeAiBtn"
+                            class="px-2 py-2 rounded-xl text-xs font-bold border border-emerald-500/80 bg-emerald-500/20 text-emerald-300 flex flex-col items-center justify-center gap-1 transition shadow-sm">
                             <i class="fa-solid fa-robot text-sm"></i>
                             <span>Đấu AI</span>
                         </button>
-                        <button id="modePassBtn" class="px-2 py-2 rounded-xl text-xs font-bold border border-slate-700 bg-slate-800/60 text-slate-400 hover:bg-slate-800 hover:text-slate-200 flex flex-col items-center justify-center gap-1 transition">
+                        <button id="modePassBtn"
+                            class="px-2 py-2 rounded-xl text-xs font-bold border border-slate-700 bg-slate-800/60 text-slate-400 hover:bg-slate-800 hover:text-slate-200 flex flex-col items-center justify-center gap-1 transition">
                             <i class="fa-solid fa-user-group text-sm"></i>
                             <span>2 Người</span>
                         </button>
-                        <button id="modeOnlineBtn" class="px-2 py-2 rounded-xl text-xs font-bold border border-slate-700 bg-slate-800/60 text-slate-400 hover:bg-slate-800 hover:text-slate-200 flex flex-col items-center justify-center gap-1 transition">
+                        <button id="modeOnlineBtn"
+                            class="px-2 py-2 rounded-xl text-xs font-bold border border-slate-700 bg-slate-800/60 text-slate-400 hover:bg-slate-800 hover:text-slate-200 flex flex-col items-center justify-center gap-1 transition">
                             <i class="fa-solid fa-globe text-sm text-indigo-400"></i>
                             <span>Online P2P</span>
                         </button>
@@ -281,11 +422,13 @@
                 </div>
 
                 <!-- Khung Điều khiển Phòng Online (Ẩn khi ở chế độ thường) -->
-                <div id="onlineControlsBox" class="hidden bg-slate-950/80 border border-indigo-500/40 rounded-xl p-3 space-y-2.5">
+                <div id="onlineControlsBox"
+                    class="hidden bg-slate-950/80 border border-indigo-500/40 rounded-xl p-3 space-y-2.5">
                     <div class="text-[11px] font-extrabold text-indigo-300 flex items-center gap-1.5 uppercase">
                         <i class="fa-solid fa-tower-broadcast animate-pulse"></i> Kết nối thời gian thực
                     </div>
-                    <button id="createRoomBtn" class="w-full py-2 bg-gradient-to-r from-indigo-600 to-emerald-600 hover:from-indigo-500 hover:to-emerald-500 text-white font-bold rounded-lg text-xs flex items-center justify-center gap-2 shadow-lg transition">
+                    <button id="createRoomBtn"
+                        class="w-full py-2 bg-gradient-to-r from-indigo-600 to-emerald-600 hover:from-indigo-500 hover:to-emerald-500 text-white font-bold rounded-lg text-xs flex items-center justify-center gap-2 shadow-lg transition">
                         <i class="fa-solid fa-circle-plus"></i> Tạo Phòng Mới (Cầm Trắng)
                     </button>
                     <div class="flex items-center gap-2 text-slate-500 text-xs">
@@ -294,36 +437,47 @@
                         <div class="h-[1px] bg-slate-800 flex-1"></div>
                     </div>
                     <div class="flex gap-2">
-                        <input type="text" id="joinRoomInput" placeholder="Nhập mã phòng..." class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white uppercase font-mono tracking-wider focus:outline-none focus:border-indigo-400">
-                        <button id="joinRoomBtn" class="px-3 py-1.5 bg-slate-800 hover:bg-indigo-600 border border-slate-700 hover:border-indigo-500 text-white rounded-lg text-xs font-bold transition">
+                        <input type="text" id="joinRoomInput" placeholder="Nhập mã phòng..."
+                            class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white uppercase font-mono tracking-wider focus:outline-none focus:border-indigo-400">
+                        <button id="joinRoomBtn"
+                            class="px-3 py-1.5 bg-slate-800 hover:bg-indigo-600 border border-slate-700 hover:border-indigo-500 text-white rounded-lg text-xs font-bold transition">
                             Vào
                         </button>
                     </div>
                 </div>
 
                 <!-- Trạng thái lượt đi -->
-                <div id="statusBanner" class="p-3 rounded-xl bg-slate-950/70 border border-slate-800 flex items-center justify-between">
+                <div id="statusBanner"
+                    class="p-3 rounded-xl bg-slate-950/70 border border-slate-800 flex items-center justify-between">
                     <span class="text-xs text-slate-400 font-medium">Trạng thái:</span>
                     <span id="gameStatusText" class="font-bold text-sm text-emerald-400 flex items-center gap-2">
-                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400"></span> Trắng đi
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400"></span> Trắng
+                        đi
                     </span>
                 </div>
 
                 <!-- Các nút hành động chính -->
                 <div class="grid grid-cols-4 gap-2 pt-1">
-                    <button id="undoBtn" class="py-2.5 px-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold flex flex-col items-center justify-center gap-1.5 transition border border-slate-700 shadow-sm" title="Đi lại 1 nước">
+                    <button id="undoBtn"
+                        class="py-2.5 px-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold flex flex-col items-center justify-center gap-1.5 transition border border-slate-700 shadow-sm"
+                        title="Đi lại 1 nước">
                         <i class="fa-solid fa-rotate-left text-sm text-amber-400"></i>
                         <span>Đi lại</span>
                     </button>
-                    <button id="flipBtn" class="py-2.5 px-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold flex flex-col items-center justify-center gap-1.5 transition border border-slate-700 shadow-sm" title="Đổi chiều bàn cờ">
+                    <button id="flipBtn"
+                        class="py-2.5 px-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold flex flex-col items-center justify-center gap-1.5 transition border border-slate-700 shadow-sm"
+                        title="Đổi chiều bàn cờ">
                         <i class="fa-solid fa-repeat text-sm text-blue-400"></i>
                         <span>Xoay bàn</span>
                     </button>
-                    <button id="resignBtn" class="py-2.5 px-2 rounded-xl bg-slate-800 hover:bg-rose-950/40 text-slate-200 hover:text-rose-300 text-xs font-semibold flex flex-col items-center justify-center gap-1.5 transition border border-slate-700 shadow-sm" title="Chấp nhận đầu hàng">
+                    <button id="resignBtn"
+                        class="py-2.5 px-2 rounded-xl bg-slate-800 hover:bg-rose-950/40 text-slate-200 hover:text-rose-300 text-xs font-semibold flex flex-col items-center justify-center gap-1.5 transition border border-slate-700 shadow-sm"
+                        title="Chấp nhận đầu hàng">
                         <i class="fa-solid fa-flag text-sm text-rose-400"></i>
                         <span>Đầu hàng</span>
                     </button>
-                    <button id="newGameBtn" class="py-2.5 px-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex flex-col items-center justify-center gap-1.5 transition shadow-lg shadow-emerald-600/30">
+                    <button id="newGameBtn"
+                        class="py-2.5 px-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex flex-col items-center justify-center gap-1.5 transition shadow-lg shadow-emerald-600/30">
                         <i class="fa-solid fa-plus text-sm"></i>
                         <span>Ván mới</span>
                     </button>
@@ -331,12 +485,15 @@
             </div>
 
             <!-- Biên bản ghi nhận nước đi -->
-            <div class="bg-slate-900/95 backdrop-blur-md rounded-2xl p-4 border border-slate-800 shadow-xl flex flex-col h-60 sm:h-64">
+            <div
+                class="bg-slate-900/95 backdrop-blur-md rounded-2xl p-4 border border-slate-800 shadow-xl flex flex-col h-60 sm:h-64">
                 <div class="flex items-center justify-between pb-2.5 border-b border-slate-800">
                     <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
                         <i class="fa-solid fa-scroll text-emerald-400"></i> Biên Bản Nước Đi
                     </h3>
-                    <span id="moveCountBadge" class="text-[11px] font-mono px-2 py-0.5 bg-slate-850 text-slate-300 rounded-md border border-slate-700">0 nước</span>
+                    <span id="moveCountBadge"
+                        class="text-[11px] font-mono px-2 py-0.5 bg-slate-850 text-slate-300 rounded-md border border-slate-700">0
+                        nước</span>
                 </div>
                 <div id="moveLogList" class="flex-1 overflow-y-auto space-y-1 pt-2 custom-scrollbar font-mono text-xs">
                     <div class="text-slate-500 italic text-center py-8">Bàn cờ đã sẵn sàng...</div>
@@ -346,21 +503,29 @@
     </main>
 
     <!-- MODAL ĂN MỪNG CHIẾN THẮNG & PHÁO HOA -->
-    <div id="victoryModal" class="hidden fixed inset-0 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 z-[100] transition-all">
-        <div class="bg-gradient-to-b from-slate-900 to-slate-950 border-2 border-emerald-500/70 rounded-3xl p-6 sm:p-8 max-w-md w-full text-center shadow-2xl relative overflow-hidden animate-bounce-short">
-            <div class="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-300 text-slate-950 flex items-center justify-center text-4xl shadow-xl shadow-emerald-500/30 mb-5">
+    <div id="victoryModal"
+        class="hidden fixed inset-0 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 z-[100] transition-all">
+        <div
+            class="bg-gradient-to-b from-slate-900 to-slate-950 border-2 border-emerald-500/70 rounded-3xl p-6 sm:p-8 max-w-md w-full text-center shadow-2xl relative overflow-hidden animate-bounce-short">
+            <div
+                class="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-300 text-slate-950 flex items-center justify-center text-4xl shadow-xl shadow-emerald-500/30 mb-5">
                 <i class="fa-solid fa-trophy" id="victoryTrophyIcon"></i>
             </div>
 
-            <span class="text-xs uppercase tracking-widest font-extrabold text-emerald-400 bg-emerald-400/10 px-3 py-1 rounded-full border border-emerald-400/30">Kết Thúc Ván Cờ</span>
+            <span
+                class="text-xs uppercase tracking-widest font-extrabold text-emerald-400 bg-emerald-400/10 px-3 py-1 rounded-full border border-emerald-400/30">Kết
+                Thúc Ván Cờ</span>
             <h2 class="text-2xl sm:text-3xl font-extrabold text-white mt-3 mb-2" id="victoryTitle">Bên Trắng Thắng!</h2>
-            <p class="text-slate-300 text-sm mb-6 leading-relaxed" id="victoryDesc">Chiếu bí đối thủ bằng nước đi chính xác tuyệt đối.</p>
+            <p class="text-slate-300 text-sm mb-6 leading-relaxed" id="victoryDesc">Chiếu bí đối thủ bằng nước đi chính
+                xác tuyệt đối.</p>
 
             <div class="flex gap-3 justify-center">
-                <button id="modalNewGameBtn" class="flex-1 py-3 px-5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-bold rounded-xl shadow-lg shadow-emerald-500/25 transition">
+                <button id="modalNewGameBtn"
+                    class="flex-1 py-3 px-5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-bold rounded-xl shadow-lg shadow-emerald-500/25 transition">
                     <i class="fa-solid fa-rotate-right mr-1.5"></i> Ván Mới
                 </button>
-                <button id="closeModalBtn" class="py-3 px-5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-xl transition border border-slate-700">
+                <button id="closeModalBtn"
+                    class="py-3 px-5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-xl transition border border-slate-700">
                     Xem Lại Bàn
                 </button>
             </div>
@@ -368,7 +533,8 @@
     </div>
 
     <!-- Thông báo Toast (Popup nhẹ) -->
-    <div id="toastNotification" class="fixed bottom-5 right-5 z-[110] bg-slate-850 border border-emerald-500/50 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 transition-all duration-300 transform translate-y-20 opacity-0">
+    <div id="toastNotification"
+        class="fixed bottom-5 right-5 z-[110] bg-slate-850 border border-emerald-500/50 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 transition-all duration-300 transform translate-y-20 opacity-0">
         <i class="fa-solid fa-circle-check text-emerald-400 text-lg"></i>
         <span id="toastMsg" class="text-xs font-semibold">Đã sao chép liên kết phòng!</span>
     </div>
@@ -420,11 +586,74 @@
             </svg>`,
 
             'wN': `<svg class="piece-svg" viewBox="0 0 100 100">
-                <ellipse cx="50" cy="85" rx="28" ry="6" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5"/>
-                <path d="M 25 85 C 25 76, 23 60, 21 53 C 20 48, 25 45, 30 45 C 33 45, 34 40, 31 34 C 33 30, 38 23, 47 16 C 53 11, 57 14, 57 18 C 65 14, 71 18, 73 24 C 77 34, 78 50, 77 65 C 76 75, 75 80, 75 85 Z" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5" stroke-linejoin="round"/>
-                <circle cx="42" cy="27" r="3.5" fill="#2b2b2b"/>
-                <path d="M 24 53 C 34 56, 42 63, 44 76" fill="none" stroke="#2b2b2b" stroke-width="4" stroke-linecap="round"/>
-            </svg>`,
+    <!-- Bóng đổ dưới đế -->
+    <ellipse cx="50" cy="89" rx="32" ry="4.5" fill="rgba(0,0,0,0.15)"/>
+    
+    <!-- Đế dưới cùng -->
+    <path d="M 18 84 C 18 80, 20 77, 24 76 L 76 76 C 80 77, 82 80, 82 84 C 82 87, 80 89, 76 89 L 24 89 C 20 89, 18 87, 18 84 Z" 
+          fill="#ffffff" stroke="#1b3a5c" stroke-width="3.5" stroke-linejoin="round"/>
+    
+    <!-- Đế giữa (cổ chân) -->
+    <path d="M 26 76 L 28 68 C 28 65, 30 63, 33 63 L 67 63 C 70 63, 72 65, 72 68 L 74 76 Z" 
+          fill="#ffffff" stroke="#1b3a5c" stroke-width="3.5" stroke-linejoin="round"/>
+    
+    <!-- Vòng cổ -->
+    <path d="M 30 63 C 30 58, 32 55, 35 55 L 65 55 C 68 55, 70 58, 70 63 Z" 
+          fill="#ffffff" stroke="#1b3a5c" stroke-width="3.5" stroke-linejoin="round"/>
+    
+    <!-- Thân + đầu ngựa -->
+    <path d="M 38 55 
+             C 34 52, 32 47, 32 42 
+             C 32 36, 34 31, 38 27 
+             C 42 23, 47 21, 52 22 
+             C 56 23, 59 26, 60 30 
+             C 61 33, 60 35, 57 37 
+             C 54 39, 51 42, 50 46 
+             C 49 50, 50 54, 52 57 
+             L 62 55 
+             C 64 54, 66 55, 66 58 
+             C 66 60, 64 62, 62 62 
+             L 38 62 
+             C 36 62, 35 60, 35 58 
+             C 35 56, 36 55, 38 55 Z" 
+          fill="#ffffff" stroke="#1b3a5c" stroke-width="3.5" stroke-linejoin="round"/>
+    
+    <!-- Tai ngựa -->
+    <path d="M 44 22 L 46 14 L 50 21 Z" fill="#ffffff" stroke="#1b3a5c" stroke-width="3" stroke-linejoin="round"/>
+    
+    <!-- Mõm ngựa -->
+    <path d="M 32 42 C 28 44, 24 47, 22 51 C 21 53, 22 55, 24 56 C 26 57, 29 56, 31 54" 
+          fill="#ffffff" stroke="#1b3a5c" stroke-width="3.5" stroke-linejoin="round"/>
+    
+    <!-- Lỗ mũi -->
+    <circle cx="27" cy="50" r="1.5" fill="#1b3a5c"/>
+    
+    <!-- Mắt đỏ -->
+    <ellipse cx="43" cy="34" rx="3" ry="2.2" fill="#e63946" stroke="#1b3a5c" stroke-width="1.2"/>
+    
+    <!-- Bờm cam (phía sau đầu) -->
+    <path d="M 52 22 
+             C 56 18, 62 16, 68 18 
+             C 74 20, 78 25, 80 32 
+             C 82 38, 81 44, 78 48 
+             C 76 50, 73 50, 71 48 
+             C 70 46, 70 43, 68 41 
+             C 66 39, 63 40, 61 42 
+             C 59 44, 58 47, 56 49 
+             C 54 51, 52 51, 51 49 
+             C 50 47, 51 44, 52 41 
+             C 53 38, 54 35, 54 32 
+             C 54 29, 53 26, 52 22 Z" 
+          fill="#f97316" stroke="#1b3a5c" stroke-width="3" stroke-linejoin="round"/>
+    
+    <!-- Chi tiết bờm cam (nét đậm) -->
+    <path d="M 56 24 C 60 22, 66 21, 71 24" fill="none" stroke="#1b3a5c" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+    <path d="M 57 30 C 62 28, 68 28, 73 31" fill="none" stroke="#1b3a5c" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+    <path d="M 56 37 C 60 36, 65 36, 69 39" fill="none" stroke="#1b3a5c" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+    
+    <!-- Chi tiết cổ (nét xanh mờ) -->
+    <path d="M 42 50 C 44 54, 46 58, 50 60" fill="none" stroke="#1b3a5c" stroke-width="2" stroke-linecap="round" opacity="0.4"/>
+</svg>`,
 
             'wB': `<svg class="piece-svg" viewBox="0 0 100 100">
                 <ellipse cx="50" cy="85" rx="27" ry="6" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5"/>
@@ -526,7 +755,7 @@
                 gain.connect(audioCtx.destination);
                 osc.start();
                 osc.stop(audioCtx.currentTime + duration);
-            } catch (e) {}
+            } catch (e) { }
         }
 
         function playCheckAlertAudio() {
@@ -560,6 +789,13 @@
             sequence.forEach(s => {
                 setTimeout(() => playSoundTone(s.f, 'triangle', s.d, 0.28), s.wait);
             });
+        }
+
+        function playTimeUpSound() {
+            if (!soundEnabled) return;
+            playSoundTone(440, 'sawtooth', 0.3, 0.3);
+            setTimeout(() => playSoundTone(330, 'sawtooth', 0.4, 0.3), 250);
+            setTimeout(() => playSoundTone(220, 'sawtooth', 0.6, 0.3), 550);
         }
 
         /* ==========================================================
@@ -688,6 +924,117 @@
         let myOnlineRole = null; // 'w' hoặc 'b'
         let roomFirebaseRef = null;
 
+        /* ==========================================================
+           5b. QUẢN LÝ ĐỒNG HỒ ĐẾM NGƯỢC (10 PHÚT MỖI BÊN)
+           ========================================================== */
+        const INITIAL_TIME_MS = 10 * 60 * 1000; // 10 phút
+        const LOW_TIME_THRESHOLD_MS = 60 * 1000; // Cảnh báo đỏ khi còn dưới 1 phút
+
+        let whiteTimeMs = INITIAL_TIME_MS;
+        let blackTimeMs = INITIAL_TIME_MS;
+        let clockInterval = null;
+        let lastClockTick = null;
+        let clockRunning = false;
+
+        function formatClockTime(ms) {
+            if (ms < 0) ms = 0;
+            const totalSeconds = Math.floor(ms / 1000);
+            const m = Math.floor(totalSeconds / 60);
+            const s = totalSeconds % 60;
+            return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        }
+
+        function updateClockDisplay() {
+            const topTimeEl = document.getElementById('topClockTime');
+            const bottomTimeEl = document.getElementById('bottomClockTime');
+            const topClockBox = document.getElementById('topClock');
+            const bottomClockBox = document.getElementById('bottomClock');
+
+            // Xác định ai đang hiển thị ở top (phụ thuộc boardFlipped)
+            const topColor = boardFlipped ? 'w' : 'b';
+            const bottomColor = boardFlipped ? 'b' : 'w';
+
+            const topMs = topColor === 'w' ? whiteTimeMs : blackTimeMs;
+            const bottomMs = bottomColor === 'w' ? whiteTimeMs : blackTimeMs;
+
+            topTimeEl.innerText = formatClockTime(topMs);
+            bottomTimeEl.innerText = formatClockTime(bottomMs);
+
+            // Active (đang đi) & low-time
+            topClockBox.classList.toggle('active', turn === topColor && !isGameOver);
+            bottomClockBox.classList.toggle('active', turn === bottomColor && !isGameOver);
+            topClockBox.classList.toggle('low-time', topMs <= LOW_TIME_THRESHOLD_MS && topMs > 0);
+            bottomClockBox.classList.toggle('low-time', bottomMs <= LOW_TIME_THRESHOLD_MS && bottomMs > 0);
+        }
+
+        function startClock() {
+            stopClock();
+            if (isGameOver) return;
+            clockRunning = true;
+            lastClockTick = performance.now();
+            clockInterval = setInterval(() => {
+                if (!clockRunning || isGameOver) return;
+                const now = performance.now();
+                const delta = now - lastClockTick;
+                lastClockTick = now;
+
+                if (turn === 'w') {
+                    whiteTimeMs -= delta;
+                    if (whiteTimeMs <= 0) {
+                        whiteTimeMs = 0;
+                        onTimeUp('w');
+                    }
+                } else {
+                    blackTimeMs -= delta;
+                    if (blackTimeMs <= 0) {
+                        blackTimeMs = 0;
+                        onTimeUp('b');
+                    }
+                }
+                updateClockDisplay();
+            }, 200);
+        }
+
+        function stopClock() {
+            clockRunning = false;
+            if (clockInterval) {
+                clearInterval(clockInterval);
+                clockInterval = null;
+            }
+        }
+
+        function resetClocks() {
+            stopClock();
+            whiteTimeMs = INITIAL_TIME_MS;
+            blackTimeMs = INITIAL_TIME_MS;
+            updateClockDisplay();
+        }
+
+        function onTimeUp(loserColor) {
+            if (isGameOver) return;
+            isGameOver = true;
+            stopClock();
+
+            const winnerName = loserColor === 'w' ? 'Bên Đen' : 'Bên Trắng';
+            const loserName = loserColor === 'w' ? 'Trắng' : 'Đen';
+
+            // Nếu đang Online, thông báo cho đối thủ qua Firebase
+            if (gameMode === 'online' && roomFirebaseRef) {
+                roomFirebaseRef.update({
+                    timeUpBy: loserColor,
+                    winnerByTime: loserColor === 'w' ? 'b' : 'w'
+                });
+            }
+
+            playTimeUpSound();
+            showVictoryCelebration(
+                `${winnerName} Thắng Do Hết Thời Gian!`,
+                `Bên ${loserName} đã sử dụng hết 10 phút. Trận đấu kết thúc!`,
+                true
+            );
+            render();
+        }
+
         function isInside(r, c) {
             return r >= 0 && r < 8 && c >= 0 && c < 8;
         }
@@ -769,8 +1116,8 @@
             if (type === 'K') {
                 const kingOffsets = [
                     [-1, -1], [-1, 0], [-1, 1],
-                    [0, -1],           [0, 1],
-                    [1, -1],  [1, 0],  [1, 1]
+                    [0, -1], [0, 1],
+                    [1, -1], [1, 0], [1, 1]
                 ];
                 for (let [dr, dc] of kingOffsets) addMove(r + dr, c + dc);
             }
@@ -883,7 +1230,7 @@
             checkEndGameStatus();
             render();
 
-            // Nếu là nước đi từ người dùng (không phải do nhận sync) và đang chơi Online -> Đồng bộ lên Firebase
+            // Đồng bộ nước đi + thời gian lên Firebase khi chơi Online
             if (!isFromSync && gameMode === 'online' && currentRoomId && roomFirebaseRef) {
                 roomFirebaseRef.update({
                     lastMove: {
@@ -892,8 +1239,15 @@
                         promoted,
                         timestamp: Date.now()
                     },
-                    turn: turn
+                    turn: turn,
+                    whiteTimeMs: whiteTimeMs,
+                    blackTimeMs: blackTimeMs
                 });
+            }
+
+            // Bắt đầu đồng hồ đếm cho bên vừa đi
+            if (!isGameOver) {
+                startClock();
             }
 
             // AI di chuyển nếu chơi chế độ Đấu Máy
@@ -908,10 +1262,11 @@
 
             if (legalMoves.length === 0) {
                 isGameOver = true;
+                stopClock();
                 const winner = turn === 'w' ? 'Bên Đen' : 'Bên Trắng';
                 if (inCheck) {
                     showVictoryCelebration(
-                        `${winner} Thắng Vẻ Vang!`,
+                        `${winner} Thắng Rồi cu!`,
                         `Chiếu bí đối thủ tuyệt đối! Vua ${turn === 'w' ? 'Trắng' : 'Đen'} không còn lối thoát.`,
                         true
                     );
@@ -1012,6 +1367,8 @@
                 blackPlayer: null,
                 lastMove: null,
                 turn: 'w',
+                whiteTimeMs: INITIAL_TIME_MS,
+                blackTimeMs: INITIAL_TIME_MS,
                 created: Date.now()
             });
 
@@ -1037,7 +1394,9 @@
             roomFirebaseRef = database.ref('chess_rooms/' + roomId);
             roomFirebaseRef.update({
                 blackPlayer: 'Guest',
-                status: 'playing'
+                status: 'playing',
+                whiteTimeMs: INITIAL_TIME_MS,
+                blackTimeMs: INITIAL_TIME_MS
             });
 
             setupOnlineRoomUI(roomId, 'b');
@@ -1074,14 +1433,47 @@
                 const data = snapshot.val();
                 if (!data) return;
 
+                // Đồng bộ thời gian từ Firebase nếu có
+                if (typeof data.whiteTimeMs === 'number' && typeof data.blackTimeMs === 'number') {
+                    // Chỉ áp dụng khi thời gian khác biệt đáng kể để tránh lag
+                    if (Math.abs(data.whiteTimeMs - whiteTimeMs) > 1500) {
+                        whiteTimeMs = data.whiteTimeMs;
+                    }
+                    if (Math.abs(data.blackTimeMs - blackTimeMs) > 1500) {
+                        blackTimeMs = data.blackTimeMs;
+                    }
+                    updateClockDisplay();
+                }
+
                 // Nếu đối thủ đầu hàng
                 if (data.resignedBy) {
                     if (!isGameOver) {
                         isGameOver = true;
+                        stopClock();
                         const winner = data.resignedBy === 'w' ? 'Bên Đen' : 'Bên Trắng';
                         showVictoryCelebration(
                             `${winner} Thắng Cuộc!`,
                             `Đối thủ đã xin đầu hàng trận đấu!`,
+                            true
+                        );
+                    }
+                    return;
+                }
+
+                // Nếu đối thủ hết thời gian
+                if (data.timeUpBy) {
+                    if (!isGameOver) {
+                        isGameOver = true;
+                        stopClock();
+                        whiteTimeMs = data.whiteTimeMs ?? whiteTimeMs;
+                        blackTimeMs = data.blackTimeMs ?? blackTimeMs;
+                        updateClockDisplay();
+                        const winner = data.timeUpBy === 'w' ? 'Bên Đen' : 'Bên Trắng';
+                        const loserName = data.timeUpBy === 'w' ? 'Trắng' : 'Đen';
+                        playTimeUpSound();
+                        showVictoryCelebration(
+                            `${winner} Thắng Do Hết Thời Gian!`,
+                            `Bên ${loserName} đã sử dụng hết 10 phút. Trận đấu kết thúc!`,
                             true
                         );
                     }
@@ -1093,10 +1485,10 @@
                     const lm = data.lastMove;
                     // Kiểm tra xem nước này đã được thực hiện ở máy mình chưa
                     const lastHistory = moveHistory[moveHistory.length - 1];
-                    const isNewMove = !lastHistory || 
-                        lastHistory.from.r !== lm.fromR || 
-                        lastHistory.from.c !== lm.fromC || 
-                        lastHistory.to.r !== lm.toR || 
+                    const isNewMove = !lastHistory ||
+                        lastHistory.from.r !== lm.fromR ||
+                        lastHistory.from.c !== lm.fromC ||
+                        lastHistory.to.r !== lm.toR ||
                         lastHistory.to.c !== lm.toC;
 
                     if (isNewMove) {
@@ -1113,6 +1505,7 @@
             }
             currentRoomId = null;
             myOnlineRole = null;
+            stopClock();
             document.getElementById('onlineRoomBar').classList.add('hidden');
             document.getElementById('connText').innerText = "Chế độ Offline / AI";
             setMode('ai');
@@ -1270,22 +1663,22 @@
             const bottomBadge = document.getElementById('bottomPlayerBadge');
 
             const isWhiteTurn = turn === 'w';
-            statusText.innerHTML = isWhiteTurn 
-                ? '<span class="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400"></span> Trắng đi' 
+            statusText.innerHTML = isWhiteTurn
+                ? '<span class="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400"></span> Trắng đi'
                 : '<span class="w-2.5 h-2.5 rounded-full bg-amber-400 shadow-sm shadow-amber-400"></span> Đen đi';
 
             if (boardFlipped) {
                 topBadge.innerText = isWhiteTurn ? 'Lượt đi' : 'Chờ';
-                topBadge.className = isWhiteTurn ? 'text-xs px-3 py-1 rounded-full font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : 'text-xs px-3 py-1 rounded-full font-semibold bg-slate-800 text-slate-400 border border-slate-700';
-                
+                topBadge.className = isWhiteTurn ? 'text-xs px-3 py-1 rounded-full font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 hidden sm:block' : 'text-xs px-3 py-1 rounded-full font-semibold bg-slate-800 text-slate-400 border border-slate-700 hidden sm:block';
+
                 bottomBadge.innerText = !isWhiteTurn ? 'Lượt đi' : 'Chờ';
-                bottomBadge.className = !isWhiteTurn ? 'text-xs px-3 py-1 rounded-full font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : 'text-xs px-3 py-1 rounded-full font-semibold bg-slate-800 text-slate-400 border border-slate-700';
+                bottomBadge.className = !isWhiteTurn ? 'text-xs px-3 py-1 rounded-full font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 hidden sm:block' : 'text-xs px-3 py-1 rounded-full font-semibold bg-slate-800 text-slate-400 border border-slate-700 hidden sm:block';
             } else {
                 bottomBadge.innerText = isWhiteTurn ? 'Lượt đi' : 'Chờ';
-                bottomBadge.className = isWhiteTurn ? 'text-xs px-3 py-1 rounded-full font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : 'text-xs px-3 py-1 rounded-full font-semibold bg-slate-800 text-slate-400 border border-slate-700';
+                bottomBadge.className = isWhiteTurn ? 'text-xs px-3 py-1 rounded-full font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 hidden sm:block' : 'text-xs px-3 py-1 rounded-full font-semibold bg-slate-800 text-slate-400 border border-slate-700 hidden sm:block';
 
                 topBadge.innerText = !isWhiteTurn ? 'Lượt đi' : 'Chờ';
-                topBadge.className = !isWhiteTurn ? 'text-xs px-3 py-1 rounded-full font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : 'text-xs px-3 py-1 rounded-full font-semibold bg-slate-800 text-slate-400 border border-slate-700';
+                topBadge.className = !isWhiteTurn ? 'text-xs px-3 py-1 rounded-full font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 hidden sm:block' : 'text-xs px-3 py-1 rounded-full font-semibold bg-slate-800 text-slate-400 border border-slate-700 hidden sm:block';
             }
 
             // Danh sách quân bị ăn
@@ -1317,6 +1710,8 @@
                 historyList.innerHTML = html;
                 historyList.scrollTop = historyList.scrollHeight;
             }
+
+            updateClockDisplay();
         }
 
         function resetGameCoreState() {
@@ -1329,9 +1724,13 @@
             capturedBlack = [];
             isGameOver = false;
             stopFireworks();
+            stopClock();
+            resetClocks();
             document.getElementById('victoryModal').classList.add('hidden');
             document.getElementById('checkAlertBanner').classList.add('hidden');
             render();
+            // Bắt đầu đồng hồ cho bên Trắng
+            startClock();
         }
 
         function setMode(mode) {
@@ -1370,6 +1769,8 @@
                 modeOnlineBtn.className = activeClass;
                 activeModeText.innerText = "ONLINE REALTIME";
                 onlineControls.classList.remove('hidden');
+                stopClock();
+                resetClocks();
             }
         }
         /* ==========================================================
@@ -1410,7 +1811,10 @@
                     roomFirebaseRef.update({
                         lastMove: null,
                         turn: 'w',
-                        resignedBy: null
+                        resignedBy: null,
+                        timeUpBy: null,
+                        whiteTimeMs: INITIAL_TIME_MS,
+                        blackTimeMs: INITIAL_TIME_MS
                     });
                 }
                 resetGameCoreState();
@@ -1421,7 +1825,10 @@
                     roomFirebaseRef.update({
                         lastMove: null,
                         turn: 'w',
-                        resignedBy: null
+                        resignedBy: null,
+                        timeUpBy: null,
+                        whiteTimeMs: INITIAL_TIME_MS,
+                        blackTimeMs: INITIAL_TIME_MS
                     });
                 }
                 resetGameCoreState();
@@ -1435,6 +1842,7 @@
             document.getElementById('resignBtn').addEventListener('click', () => {
                 if (isGameOver) return;
                 isGameOver = true;
+                stopClock();
                 const winner = turn === 'w' ? 'Bên Đen' : 'Bên Trắng';
 
                 if (gameMode === 'online' && roomFirebaseRef) {
@@ -1464,21 +1872,21 @@
                 }
                 if (moveHistory.length === 0 || isGameOver) return;
                 const stepsToUndo = (gameMode === 'ai' && moveHistory.length >= 2 && turn === 'w') ? 2 : 1;
-                
+
                 for (let s = 0; s < stepsToUndo; s++) {
                     const last = moveHistory.pop();
                     if (!last) break;
-                    
+
                     board[last.from.r][last.from.c] = last.piece;
                     board[last.to.r][last.to.c] = last.captured;
-                    
+
                     if (last.captured) {
                         if (last.color === 'w') capturedWhite.pop();
                         else capturedBlack.pop();
                     }
                     turn = last.color;
                 }
-                
+
                 selectedSquare = null;
                 validMoves = [];
                 render();
@@ -1505,4 +1913,5 @@
         });
     </script>
 </body>
+
 </html>
