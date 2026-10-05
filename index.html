@@ -233,6 +233,80 @@
             font-size: 0.75rem;
             opacity: 0.85;
         }
+
+        /* ==== SMOOTH PIECE MOVE ANIMATION ==== */
+        @keyframes piece-slide-in {
+            0% {
+                transform: scale(0.6) translateY(-8px);
+                opacity: 0.3;
+                filter: blur(1px);
+            }
+            60% {
+                transform: scale(1.08) translateY(2px);
+                opacity: 1;
+                filter: blur(0);
+            }
+            100% {
+                transform: scale(1) translateY(0);
+                opacity: 1;
+                filter: blur(0);
+            }
+        }
+
+        @keyframes piece-fade-out {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(0.4);
+                opacity: 0;
+                filter: blur(2px);
+            }
+        }
+
+        @keyframes piece-capture-pop {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.35);
+                opacity: 0.8;
+                filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.8));
+            }
+            100% {
+                transform: scale(0.2);
+                opacity: 0;
+                filter: blur(3px);
+            }
+        }
+
+        .piece-animate-in {
+            animation: piece-slide-in 0.32s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        .piece-animate-capture {
+            animation: piece-capture-pop 0.36s cubic-bezier(0.55, 0, 1, 0.45) forwards;
+        }
+
+        .piece-animate-move {
+            animation: piece-slide-in 0.34s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        .piece-animate-out {
+            animation: piece-fade-out 0.25s ease-out forwards;
+        }
+
+        /* Board overlay for click during animation */
+        .chessboard-animating {
+            pointer-events: none;
+        }
+
+        /* Smooth transition for all squares */
+        #chessboard > div {
+            transition: background-color 0.2s ease, box-shadow 0.25s ease;
+        }
     </style>
 </head>
 
@@ -918,6 +992,7 @@
         let gameMode = 'ai'; // 'ai', 'pass', 'online'
         let boardFlipped = false;
         let isGameOver = false;
+        let isAnimating = false; // Ngăn chặn tương tác trong khi animation chạy
 
         // Trạng thái chơi Online
         let currentRoomId = null;
@@ -1187,14 +1262,19 @@
             return moves;
         }
 
-        // Thực hiện nước đi trên bàn cờ
+        // Thực hiện nước đi trên bàn cờ (CÓ ANIMATION MƯỢT MÀ)
         function executeMove(fromR, fromC, toR, toC, isFromSync = false) {
+            if (isAnimating) return;
+
             const movingPiece = board[fromR][fromC];
             const capturedPiece = board[toR][toC];
             if (!movingPiece) return;
 
+            isAnimating = true;
+
             const color = movingPiece[0];
 
+            // Cập nhật board state ngay lập tức
             board[toR][toC] = movingPiece;
             board[fromR][fromC] = null;
 
@@ -1228,32 +1308,137 @@
 
             turn = nextColor;
             checkEndGameStatus();
+
+            // Render với animation
+            renderAnimatedMove(fromR, fromC, toR, toC, movingPiece, capturedPiece, () => {
+                isAnimating = false;
+
+                // Đồng bộ nước đi + thời gian lên Firebase khi chơi Online
+                if (!isFromSync && gameMode === 'online' && currentRoomId && roomFirebaseRef) {
+                    roomFirebaseRef.update({
+                        lastMove: {
+                            fromR, fromC, toR, toC,
+                            color,
+                            promoted,
+                            timestamp: Date.now()
+                        },
+                        turn: turn,
+                        whiteTimeMs: whiteTimeMs,
+                        blackTimeMs: blackTimeMs
+                    });
+                }
+
+                // Bắt đầu đồng hồ đếm cho bên vừa đi
+                if (!isGameOver) {
+                    startClock();
+                }
+
+                // AI di chuyển nếu chơi chế độ Đấu Máy
+                if (!isGameOver && gameMode === 'ai' && turn === 'b') {
+                    setTimeout(makeAIMove, 280);
+                }
+            });
+        }
+
+        // Render animation di chuyển quân cờ
+        function renderAnimatedMove(fromR, fromC, toR, toC, movingPiece, capturedPiece, callback) {
+            // Render board cơ bản (không animation)
             render();
 
-            // Đồng bộ nước đi + thời gian lên Firebase khi chơi Online
-            if (!isFromSync && gameMode === 'online' && currentRoomId && roomFirebaseRef) {
-                roomFirebaseRef.update({
-                    lastMove: {
-                        fromR, fromC, toR, toC,
-                        color,
-                        promoted,
-                        timestamp: Date.now()
-                    },
-                    turn: turn,
-                    whiteTimeMs: whiteTimeMs,
-                    blackTimeMs: blackTimeMs
+            const boardEl = document.getElementById('chessboard');
+            const squares = boardEl.children;
+
+            // Tìm ô nguồn và đích
+            const getSquareIndex = (r, c) => {
+                const i = boardFlipped ? 7 - r : r;
+                const j = boardFlipped ? 7 - c : c;
+                return i * 8 + j;
+            };
+
+            const fromIdx = getSquareIndex(fromR, fromC);
+            const toIdx = getSquareIndex(toR, toC);
+
+            const fromSquare = squares[fromIdx];
+            const toSquare = squares[toIdx];
+
+            if (!fromSquare || !toSquare) {
+                // Fallback
+                callback();
+                return;
+            }
+
+            // Xóa quân cờ ở ô đích (để animation hiển thị)
+            const existingPieceInTarget = toSquare.querySelector('.piece-container');
+            if (existingPieceInTarget) {
+                existingPieceInTarget.remove();
+            }
+
+            // Tạo element quân cờ di chuyển
+            const movingPieceEl = document.createElement('div');
+            movingPieceEl.className = 'piece-container absolute';
+            movingPieceEl.style.width = '90%';
+            movingPieceEl.style.height = '90%';
+            movingPieceEl.style.left = '5%';
+            movingPieceEl.style.top = '5%';
+            movingPieceEl.style.zIndex = '50';
+            movingPieceEl.style.pointerEvents = 'none';
+            movingPieceEl.innerHTML = SVG_PIECES[movingPiece];
+
+            // Tính toán vị trí
+            const fromRect = fromSquare.getBoundingClientRect();
+            const toRect = toSquare.getBoundingClientRect();
+            const boardRect = boardEl.getBoundingClientRect();
+
+            const fromX = fromRect.left - boardRect.left;
+            const fromY = fromRect.top - boardRect.top;
+            const toX = toRect.left - boardRect.left;
+            const toY = toRect.top - boardRect.top;
+
+            movingPieceEl.style.left = fromX + 'px';
+            movingPieceEl.style.top = fromY + 'px';
+            movingPieceEl.style.width = fromRect.width + 'px';
+            movingPieceEl.style.height = fromRect.height + 'px';
+            movingPieceEl.style.transition = 'left 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), top 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+
+            boardEl.style.position = 'relative';
+            boardEl.appendChild(movingPieceEl);
+
+            // Hiệu ứng quân bị ăn
+            if (capturedPiece) {
+                // Hiệu ứng biến mất của quân bị ăn (sẽ được thêm vào từ square cũ)
+                const capturedEl = document.createElement('div');
+                capturedEl.className = 'piece-container absolute piece-animate-capture';
+                capturedEl.style.width = '90%';
+                capturedEl.style.height = '90%';
+                capturedEl.style.left = toX + 'px';
+                capturedEl.style.top = toY + 'px';
+                capturedEl.style.width = toRect.width + 'px';
+                capturedEl.style.height = toRect.height + 'px';
+                capturedEl.style.zIndex = '45';
+                capturedEl.style.pointerEvents = 'none';
+                capturedEl.innerHTML = SVG_PIECES[capturedPiece];
+                boardEl.appendChild(capturedEl);
+            }
+
+            // Bắt đầu animation sau một frame
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    movingPieceEl.style.left = toX + 'px';
+                    movingPieceEl.style.top = toY + 'px';
                 });
-            }
+            });
 
-            // Bắt đầu đồng hồ đếm cho bên vừa đi
-            if (!isGameOver) {
-                startClock();
-            }
+            // Sau khi animation hoàn tất
+            setTimeout(() => {
+                movingPieceEl.remove();
+                // Xóa hiệu ứng quân bị ăn nếu có
+                const captureEffects = boardEl.querySelectorAll('.piece-animate-capture');
+                captureEffects.forEach(el => el.remove());
 
-            // AI di chuyển nếu chơi chế độ Đấu Máy
-            if (!isGameOver && gameMode === 'ai' && turn === 'b') {
-                setTimeout(makeAIMove, 280);
-            }
+                // Render lại board cuối cùng
+                render();
+                callback();
+            }, 350);
         }
 
         function checkEndGameStatus() {
@@ -1308,7 +1493,7 @@
         }
 
         function makeAIMove() {
-            if (isGameOver) return;
+            if (isGameOver || isAnimating) return;
             const blackMoves = getAllLegalMoves('b');
             if (blackMoves.length === 0) return;
 
@@ -1491,7 +1676,7 @@
                         lastHistory.to.r !== lm.toR ||
                         lastHistory.to.c !== lm.toC;
 
-                    if (isNewMove) {
+                    if (isNewMove && !isAnimating) {
                         executeMove(lm.fromR, lm.fromC, lm.toR, lm.toC, true);
                     }
                 }
@@ -1615,7 +1800,7 @@
         }
 
         function handleSquareClick(r, c) {
-            if (isGameOver) return;
+            if (isGameOver || isAnimating) return;
 
             // Chặn khi đấu với AI và đang là lượt AI
             if (gameMode === 'ai' && turn === 'b') return;
@@ -1723,6 +1908,7 @@
             capturedWhite = [];
             capturedBlack = [];
             isGameOver = false;
+            isAnimating = false;
             stopFireworks();
             stopClock();
             resetClocks();
@@ -1870,7 +2056,7 @@
                     showToast("Không thể đi lại khi đấu Online!");
                     return;
                 }
-                if (moveHistory.length === 0 || isGameOver) return;
+                if (moveHistory.length === 0 || isGameOver || isAnimating) return;
                 const stepsToUndo = (gameMode === 'ai' && moveHistory.length >= 2 && turn === 'w') ? 2 : 1;
 
                 for (let s = 0; s < stepsToUndo; s++) {
