@@ -5,14 +5,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chess Master - make by hoa thanh quế</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link
         href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap"
         rel="stylesheet">
 
-    <!-- Firebase SDK Compat Version -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
@@ -26,14 +24,11 @@
             background: radial-gradient(ellipse at center, rgba(239, 68, 68, 0.95) 0%, rgba(220, 38, 38, 0.7) 45%, rgba(185, 28, 28, 0.35) 75%, transparent 100%) !important;
             animation: pulse-check 1.1s infinite alternate cubic-bezier(0.4, 0, 0.6, 1);
         }
-
         @keyframes pulse-check {
             0% { box-shadow: inset 0 0 15px rgba(239, 68, 68, 0.8), 0 0 20px rgba(239, 68, 68, 0.6); }
             100% { box-shadow: inset 0 0 30px rgba(220, 38, 38, 1), 0 0 35px rgba(239, 68, 68, 0.9); }
         }
-
         .king-tremor { animation: king-alert-tremor 0.8s infinite ease-in-out; }
-
         @keyframes king-alert-tremor {
             0%, 100% { transform: scale(1.06) rotate(0deg); }
             20% { transform: scale(1.09) rotate(-3.5deg); }
@@ -59,7 +54,6 @@
             pointer-events: none; z-index: 15;
             transition: transform 0.2s ease;
         }
-
         .capture-hint {
             position: absolute; width: 86%; height: 86%; border-radius: 50%;
             border: 6px solid rgba(225, 29, 72, 0.6);
@@ -67,7 +61,6 @@
             pointer-events: none; z-index: 15;
             animation: pulse-capture 1.3s infinite alternate;
         }
-
         @keyframes pulse-capture {
             0% { transform: scale(0.96); opacity: 0.7; }
             100% { transform: scale(1.03); opacity: 1; }
@@ -80,15 +73,10 @@
             width: 100vw; height: 100vh;
             pointer-events: none; z-index: 90;
         }
-
-        /* ===== CANVAS HIỆU ỨNG CHIẾN ĐẤU (NỔ, TIA LỬA, KHÓI) ===== */
         #combatCanvas {
-            position: fixed;
-            inset: 0;
-            width: 100vw;
-            height: 100vh;
-            pointer-events: none;
-            z-index: 85;
+            position: fixed; inset: 0;
+            width: 100vw; height: 100vh;
+            pointer-events: none; z-index: 85;
         }
 
         .custom-scrollbar::-webkit-scrollbar { width: 5px; }
@@ -123,58 +111,99 @@
 
         .clock-icon { font-size: 0.9rem; opacity: 0.85; }
         .clock-time { font-variant-numeric: tabular-nums; }
-        .clock-badge-flag { font-size: 0.75rem; opacity: 0.85; }
 
-        /* ==== SMOOTH PIECE MOVE ANIMATION ==== */
         @keyframes piece-slide-in {
             0% { transform: scale(0.6) translateY(-8px); opacity: 0.3; filter: blur(1px); }
             60% { transform: scale(1.08) translateY(2px); opacity: 1; filter: blur(0); }
             100% { transform: scale(1) translateY(0); opacity: 1; filter: blur(0); }
-        }
-        @keyframes piece-fade-out {
-            0% { transform: scale(1); opacity: 1; }
-            100% { transform: scale(0.4); opacity: 0; filter: blur(2px); }
         }
         @keyframes piece-capture-pop {
             0% { transform: scale(1); opacity: 1; }
             50% { transform: scale(1.35); opacity: 0.8; filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.8)); }
             100% { transform: scale(0.2); opacity: 0; filter: blur(3px); }
         }
-        .piece-animate-in { animation: piece-slide-in 0.32s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
         .piece-animate-capture { animation: piece-capture-pop 0.36s cubic-bezier(0.55, 0, 1, 0.45) forwards; }
-        .piece-animate-move { animation: piece-slide-in 0.34s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
-        .piece-animate-out { animation: piece-fade-out 0.25s ease-out forwards; }
 
-        .chessboard-animating { pointer-events: none; }
         #chessboard > div { transition: background-color 0.2s ease, box-shadow 0.25s ease; }
 
-        /* ===== HIỆU ỨNG FLASH TRẮNG KHI BẮT QUÂN ===== */
         @keyframes capture-flash {
             0% { opacity: 0.9; transform: scale(0.5); }
             100% { opacity: 0; transform: scale(2.2); }
         }
         .capture-flash-effect {
             position: absolute;
-            width: 100%;
-            height: 100%;
+            width: 100%; height: 100%;
             border-radius: 50%;
             background: radial-gradient(circle, rgba(255,255,255,0.95) 0%, rgba(255,230,120,0.7) 40%, rgba(255,80,0,0) 70%);
             pointer-events: none;
             animation: capture-flash 0.45s ease-out forwards;
             z-index: 60;
         }
+
+        @keyframes call-pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+            50% { box-shadow: 0 0 0 12px rgba(34, 197, 94, 0); }
+        }
+        .call-pulse { animation: call-pulse 1.6s infinite; }
+
+        @keyframes incoming-ring {
+            0%, 100% { transform: rotate(0deg); }
+            10% { transform: rotate(-12deg); }
+            20% { transform: rotate(12deg); }
+            30% { transform: rotate(-10deg); }
+            40% { transform: rotate(10deg); }
+            50% { transform: rotate(-6deg); }
+            60% { transform: rotate(6deg); }
+            70% { transform: rotate(0deg); }
+        }
+        .ringing-icon { animation: incoming-ring 1s infinite; }
+
+        @keyframes modal-pop {
+            0% { transform: scale(0.7); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .modal-pop { animation: modal-pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+        .call-bar {
+            backdrop-filter: blur(14px);
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.92));
+            border: 1.5px solid rgba(34, 197, 94, 0.55);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), 0 0 30px rgba(34, 197, 94, 0.25);
+        }
+
+        .mic-btn-muted {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.9), rgba(220, 38, 38, 0.85)) !important;
+            color: white !important;
+            border-color: rgba(248, 113, 113, 0.7) !important;
+        }
+
+        /* AI thinking indicator */
+        #aiThinking {
+            backdrop-filter: blur(10px);
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.92), rgba(30, 41, 59, 0.88));
+            border: 1.5px solid rgba(99, 102, 241, 0.6);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), 0 0 25px rgba(99, 102, 241, 0.25);
+        }
+        @keyframes ai-think {
+            0%, 100% { transform: translateY(0px) scale(1); opacity: 1; }
+            50% { transform: translateY(-3px) scale(1.1); opacity: 0.7; }
+        }
+        .ai-dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: linear-gradient(135deg, #818cf8, #a78bfa);
+            animation: ai-think 1s infinite ease-in-out;
+        }
+        .ai-dot:nth-child(2) { animation-delay: 0.15s; }
+        .ai-dot:nth-child(3) { animation-delay: 0.3s; }
     </style>
 </head>
 
 <body
     class="bg-gradient-to-br from-[#111417] via-[#181d23] to-[#0d1013] text-slate-100 min-h-screen flex flex-col font-['Plus_Jakarta_Sans',sans-serif] selection:bg-emerald-500 selection:text-black relative overflow-x-hidden">
 
-    <!-- Canvas Pháo hoa toàn màn hình -->
     <canvas id="fireworksCanvas"></canvas>
-    <!-- Canvas hiệu ứng chiến đấu (nổ, tia lửa, khói) -->
     <canvas id="combatCanvas"></canvas>
 
-    <!-- Header điều hướng -->
     <header
         class="w-full max-w-6xl mx-auto px-4 py-3 flex items-center justify-between border-b border-slate-800/80 backdrop-blur-md">
         <div class="flex items-center gap-3">
@@ -188,8 +217,7 @@
                         class="text-[10px] uppercase font-bold tracking-wider bg-emerald-500/20 text-emerald-400 px-2.5 py-0.5 rounded-full border border-emerald-500/30">Neo
                         Live</span>
                 </h1>
-                <p class="text-xs text-slate-400 hidden sm:block">Make by hoa thanh quế
-                </p>
+                <p class="text-xs text-slate-400 hidden sm:block">Make by hoa thanh quế</p>
             </div>
         </div>
 
@@ -207,7 +235,6 @@
         </div>
     </header>
 
-    <!-- Banner Cảnh báo Chiếu tướng -->
     <div id="checkAlertBanner" class="hidden w-full max-w-md mx-auto px-4 mt-2 transition-all duration-300">
         <div
             class="bg-rose-600/95 text-white font-extrabold text-sm py-2.5 px-4 rounded-xl border-2 border-rose-400 flex items-center justify-center gap-2.5 shadow-xl shadow-rose-900/50 animate-bounce">
@@ -216,11 +243,10 @@
         </div>
     </div>
 
-    <!-- Thông báo Online Room Banner -->
     <div id="onlineRoomBar" class="hidden w-full max-w-6xl mx-auto px-4 mt-2">
         <div
             class="bg-gradient-to-r from-emerald-950/70 via-slate-900 to-indigo-950/70 border border-emerald-500/40 rounded-xl p-3 flex flex-wrap items-center justify-between gap-3 text-xs">
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 flex-wrap">
                 <span
                     class="bg-emerald-500/20 text-emerald-300 px-2.5 py-1 rounded-lg border border-emerald-500/30 font-bold flex items-center gap-1.5">
                     <i class="fa-solid fa-wifi text-emerald-400"></i> Phòng: <span id="displayRoomCode"
@@ -231,7 +257,13 @@
                     Bạn: Cầm Trắng ⚪
                 </span>
             </div>
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 flex-wrap">
+                <button id="callBtn"
+                    class="px-3 py-1.5 bg-emerald-700/40 hover:bg-emerald-600/60 text-emerald-200 rounded-lg border border-emerald-500/60 flex items-center gap-1.5 transition font-semibold shadow-sm"
+                    title="Gọi thoại với đối thủ">
+                    <i class="fa-solid fa-phone text-emerald-400"></i>
+                    <span>Gọi thoại</span>
+                </button>
                 <button id="copyRoomLinkBtn"
                     class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg border border-slate-600 flex items-center gap-1.5 transition font-semibold">
                     <i class="fa-solid fa-link text-indigo-400"></i> Sao chép Link mời
@@ -244,11 +276,9 @@
         </div>
     </div>
 
-    <!-- Khu vực chơi cờ chính -->
     <main
         class="w-full max-w-6xl mx-auto px-2 sm:px-4 py-3 sm:py-4 flex-1 flex flex-col lg:flex-row items-center lg:items-start justify-center gap-6">
 
-        <!-- Cột bàn cờ -->
         <div class="flex flex-col items-center w-full max-w-[530px]">
             <div
                 class="w-full flex items-center justify-between bg-[#21262d] px-4 py-2.5 rounded-t-2xl border-t border-x border-slate-700/70 shadow-lg gap-3">
@@ -262,7 +292,7 @@
                             id="topPlayerName">
                             AI Bot (Đen)
                             <span class="text-[10px] px-1.5 py-0.5 bg-slate-700 rounded text-slate-300 font-mono"
-                                id="topPlayerSub">1550 ELO</span>
+                                id="topPlayerSub">2200 ELO</span>
                         </div>
                         <div class="flex items-center gap-1 min-h-[22px]" id="blackCaptures"></div>
                     </div>
@@ -317,9 +347,7 @@
             </div>
         </div>
 
-        <!-- Sidebar / Điều khiển & Lịch sử -->
         <div class="w-full max-w-[530px] lg:w-80 flex flex-col gap-4">
-
             <div class="bg-slate-900/95 backdrop-blur-md rounded-2xl p-4 border border-slate-800 shadow-xl space-y-3.5">
                 <div>
                     <div
@@ -344,6 +372,42 @@
                             class="px-2 py-2 rounded-xl text-xs font-bold border border-slate-700 bg-slate-800/60 text-slate-400 hover:bg-slate-800 hover:text-slate-200 flex flex-col items-center justify-center gap-1 transition">
                             <i class="fa-solid fa-globe text-sm text-indigo-400"></i>
                             <span>Online P2P</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ===== BỘ CHỌN ĐỘ KHÓ ===== -->
+                <div id="difficultySelector">
+                    <div
+                        class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center justify-between">
+                        <span>Độ khó Bot</span>
+                        <span id="activeDifficultyText" class="text-[10px] text-amber-400 font-bold font-mono">SIÊU
+                            KHÓ (~2200)</span>
+                    </div>
+                    <div class="grid grid-cols-4 gap-1.5">
+                        <button id="diffEasyBtn"
+                            class="px-1.5 py-2 rounded-xl text-[11px] font-bold border border-slate-700 bg-slate-800/60 text-slate-400 hover:bg-slate-800 hover:text-emerald-300 flex flex-col items-center justify-center gap-1 transition">
+                            <i class="fa-solid fa-face-smile text-sm text-emerald-400"></i>
+                            <span>Dễ</span>
+                            <span class="text-[9px] opacity-70">~800</span>
+                        </button>
+                        <button id="diffMediumBtn"
+                            class="px-1.5 py-2 rounded-xl text-[11px] font-bold border border-slate-700 bg-slate-800/60 text-slate-400 hover:bg-slate-800 hover:text-amber-300 flex flex-col items-center justify-center gap-1 transition">
+                            <i class="fa-solid fa-face-meh text-sm text-amber-400"></i>
+                            <span>Vừa</span>
+                            <span class="text-[9px] opacity-70">~1300</span>
+                        </button>
+                        <button id="diffHardBtn"
+                            class="px-1.5 py-2 rounded-xl text-[11px] font-bold border border-slate-700 bg-slate-800/60 text-slate-400 hover:bg-slate-800 hover:text-orange-300 flex flex-col items-center justify-center gap-1 transition">
+                            <i class="fa-solid fa-face-frown text-sm text-orange-400"></i>
+                            <span>Khó</span>
+                            <span class="text-[9px] opacity-70">~1700</span>
+                        </button>
+                        <button id="diffExpertBtn"
+                            class="px-1.5 py-2 rounded-xl text-[11px] font-bold border border-amber-500/80 bg-amber-500/20 text-amber-300 flex flex-col items-center justify-center gap-1 transition shadow-sm">
+                            <i class="fa-solid fa-skull text-sm text-rose-400"></i>
+                            <span>Siêu khó</span>
+                            <span class="text-[9px] opacity-70">~2200</span>
                         </button>
                     </div>
                 </div>
@@ -425,23 +489,19 @@
         </div>
     </main>
 
-    <!-- MODAL ĂN MỪNG CHIẾN THẮNG & PHÁO HOA -->
     <div id="victoryModal"
         class="hidden fixed inset-0 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 z-[100] transition-all">
         <div
-            class="bg-gradient-to-b from-slate-900 to-slate-950 border-2 border-emerald-500/70 rounded-3xl p-6 sm:p-8 max-w-md w-full text-center shadow-2xl relative overflow-hidden animate-bounce-short">
+            class="bg-gradient-to-b from-slate-900 to-slate-950 border-2 border-emerald-500/70 rounded-3xl p-6 sm:p-8 max-w-md w-full text-center shadow-2xl relative overflow-hidden">
             <div
                 class="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-300 text-slate-950 flex items-center justify-center text-4xl shadow-xl shadow-emerald-500/30 mb-5">
                 <i class="fa-solid fa-trophy" id="victoryTrophyIcon"></i>
             </div>
-
             <span
                 class="text-xs uppercase tracking-widest font-extrabold text-emerald-400 bg-emerald-400/10 px-3 py-1 rounded-full border border-emerald-400/30">Kết
                 Thúc Ván Cờ</span>
             <h2 class="text-2xl sm:text-3xl font-extrabold text-white mt-3 mb-2" id="victoryTitle">Bên Trắng Thắng!</h2>
-            <p class="text-slate-300 text-sm mb-6 leading-relaxed" id="victoryDesc">Chiếu bí đối thủ bằng nước đi chính
-                xác tuyệt đối.</p>
-
+            <p class="text-slate-300 text-sm mb-6 leading-relaxed" id="victoryDesc">Chiếu bí đối thủ.</p>
             <div class="flex gap-3 justify-center">
                 <button id="modalNewGameBtn"
                     class="flex-1 py-3 px-5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-bold rounded-xl shadow-lg shadow-emerald-500/25 transition">
@@ -455,16 +515,83 @@
         </div>
     </div>
 
-    <!-- Thông báo Toast (Popup nhẹ) -->
     <div id="toastNotification"
         class="fixed bottom-5 right-5 z-[110] bg-slate-850 border border-emerald-500/50 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 transition-all duration-300 transform translate-y-20 opacity-0">
         <i class="fa-solid fa-circle-check text-emerald-400 text-lg"></i>
-        <span id="toastMsg" class="text-xs font-semibold">Đã sao chép liên kết phòng!</span>
+        <span id="toastMsg" class="text-xs font-semibold">Thông báo!</span>
     </div>
+
+    <div id="incomingCallModal"
+        class="hidden fixed inset-0 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4 z-[120]">
+        <div
+            class="modal-pop bg-gradient-to-b from-slate-900 to-slate-950 border-2 border-emerald-500/70 rounded-3xl p-6 sm:p-8 max-w-sm w-full text-center shadow-2xl">
+            <div
+                class="w-20 h-20 mx-auto rounded-full bg-gradient-to-tr from-emerald-500 to-teal-300 flex items-center justify-center mb-5 relative">
+                <i class="fa-solid fa-phone-volume text-3xl text-slate-950 ringing-icon"></i>
+                <span class="absolute inset-0 rounded-full bg-emerald-400 opacity-30 animate-ping"></span>
+            </div>
+            <span
+                class="text-xs uppercase tracking-widest font-extrabold text-emerald-400 bg-emerald-400/10 px-3 py-1 rounded-full border border-emerald-400/30">Cuộc
+                gọi đến</span>
+            <h2 class="text-xl font-extrabold text-white mt-3 mb-1">Đối thủ đang gọi thoại</h2>
+            <p class="text-slate-400 text-sm mb-6">Bạn có muốn bắt máy không?</p>
+            <div class="flex gap-3 justify-center">
+                <button id="rejectCallBtn"
+                    class="flex-1 py-3 px-5 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl shadow-lg shadow-rose-600/30 transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-phone-slash"></i> Từ chối
+                </button>
+                <button id="acceptCallBtn"
+                    class="flex-1 py-3 px-5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-bold rounded-xl shadow-lg shadow-emerald-500/30 transition flex items-center justify-center gap-2 call-pulse">
+                    <i class="fa-solid fa-phone"></i> Nghe máy
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="callBar"
+        class="hidden fixed top-20 left-1/2 -translate-x-1/2 z-[115] call-bar rounded-2xl px-4 py-3 flex items-center gap-3 text-white shadow-2xl min-w-[280px] max-w-[92vw]">
+        <div class="relative shrink-0">
+            <div class="w-11 h-11 rounded-full bg-gradient-to-tr from-emerald-500 to-teal-300 flex items-center justify-center text-slate-950 shadow-lg">
+                <i class="fa-solid fa-phone text-lg"></i>
+                <span class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-400 border-2 border-slate-900 animate-pulse"></span>
+            </div>
+        </div>
+        <div class="flex-1 min-w-0">
+            <div class="text-xs font-bold text-emerald-300 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                Đang gọi thoại
+            </div>
+            <div class="text-[11px] text-slate-300 font-mono" id="callTimer">00:00</div>
+            <div class="text-[10px] text-slate-400 truncate mt-0.5" id="callPeerStatus">Đối thủ</div>
+        </div>
+        <button id="muteMicBtn"
+            class="w-10 h-10 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-600 flex items-center justify-center transition text-slate-200 shrink-0"
+            title="Tắt/Bật mic">
+            <i class="fa-solid fa-microphone text-base" id="muteMicIcon"></i>
+        </button>
+        <button id="endCallBtn"
+            class="w-10 h-10 rounded-xl bg-rose-600 hover:bg-rose-500 border border-rose-400 flex items-center justify-center transition text-white shrink-0 shadow-lg shadow-rose-600/30"
+            title="Kết thúc cuộc gọi">
+            <i class="fa-solid fa-phone-slash text-base"></i>
+        </button>
+    </div>
+
+    <!-- AI Thinking Indicator -->
+    <div id="aiThinking"
+        class="hidden fixed top-24 left-1/2 -translate-x-1/2 z-[80] rounded-2xl px-4 py-2.5 flex items-center gap-3 text-white">
+        <div class="flex gap-1">
+            <div class="ai-dot"></div>
+            <div class="ai-dot"></div>
+            <div class="ai-dot"></div>
+        </div>
+        <span class="text-xs font-bold text-indigo-200">AI đang suy nghĩ...</span>
+    </div>
+
+    <audio id="remoteAudio" autoplay playsinline></audio>
 
     <script>
         /* ==========================================================
-           1. CẤU HÌNH FIREBASE
+           FIREBASE
            ========================================================== */
         const firebaseConfig = {
             apiKey: "AIzaSyB0-FKFRXE3pz8mAESeyQqp6r04_GL55R8",
@@ -488,111 +615,27 @@
         }
 
         /* ==========================================================
-           2. BỘ VECTOR SVG QUÂN CỜ
+           SVG PIECES
            ========================================================== */
         const SVG_PIECES = {
-            'wP': `<svg class="piece-svg" viewBox="0 0 100 100">
-                <ellipse cx="50" cy="85" rx="27" ry="6" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5"/>
-                <path d="M 33 85 C 33 65, 40 50, 43 45 L 57 45 C 60 50, 67 65, 67 85 Z" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5" stroke-linejoin="round"/>
-                <ellipse cx="50" cy="45" rx="17" ry="5" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5"/>
-                <circle cx="50" cy="27" r="15" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5"/>
-                <ellipse cx="46" cy="23" rx="4" ry="2.5" fill="#ffffff" opacity="0.6"/>
-            </svg>`,
-            'wR': `<svg class="piece-svg" viewBox="0 0 100 100">
-                <rect x="20" y="78" width="60" height="13" rx="4" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5"/>
-                <path d="M 27 78 L 31 43 L 69 43 L 73 78 Z" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5" stroke-linejoin="round"/>
-                <rect x="22" y="32" width="56" height="11" rx="2" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5"/>
-                <path d="M 22 32 L 22 17 L 34 17 L 34 25 L 44 25 L 44 17 L 56 17 L 56 25 L 66 25 L 66 17 L 78 17 L 78 32 Z" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5" stroke-linejoin="round"/>
-            </svg>`,
-            'wN': `<svg class="piece-svg" viewBox="0 0 100 100">
-    <ellipse cx="50" cy="89" rx="32" ry="4.5" fill="rgba(0,0,0,0.15)"/>
-    <path d="M 18 84 C 18 80, 20 77, 24 76 L 76 76 C 80 77, 82 80, 82 84 C 82 87, 80 89, 76 89 L 24 89 C 20 89, 18 87, 18 84 Z" fill="#ffffff" stroke="#1b3a5c" stroke-width="3.5" stroke-linejoin="round"/>
-    <path d="M 26 76 L 28 68 C 28 65, 30 63, 33 63 L 67 63 C 70 63, 72 65, 72 68 L 74 76 Z" fill="#ffffff" stroke="#1b3a5c" stroke-width="3.5" stroke-linejoin="round"/>
-    <path d="M 30 63 C 30 58, 32 55, 35 55 L 65 55 C 68 55, 70 58, 70 63 Z" fill="#ffffff" stroke="#1b3a5c" stroke-width="3.5" stroke-linejoin="round"/>
-    <path d="M 38 55 C 34 52, 32 47, 32 42 C 32 36, 34 31, 38 27 C 42 23, 47 21, 52 22 C 56 23, 59 26, 60 30 C 61 33, 60 35, 57 37 C 54 39, 51 42, 50 46 C 49 50, 50 54, 52 57 L 62 55 C 64 54, 66 55, 66 58 C 66 60, 64 62, 62 62 L 38 62 C 36 62, 35 60, 35 58 C 35 56, 36 55, 38 55 Z" fill="#ffffff" stroke="#1b3a5c" stroke-width="3.5" stroke-linejoin="round"/>
-    <path d="M 44 22 L 46 14 L 50 21 Z" fill="#ffffff" stroke="#1b3a5c" stroke-width="3" stroke-linejoin="round"/>
-    <path d="M 32 42 C 28 44, 24 47, 22 51 C 21 53, 22 55, 24 56 C 26 57, 29 56, 31 54" fill="#ffffff" stroke="#1b3a5c" stroke-width="3.5" stroke-linejoin="round"/>
-    <circle cx="27" cy="50" r="1.5" fill="#1b3a5c"/>
-    <ellipse cx="43" cy="34" rx="3" ry="2.2" fill="#e63946" stroke="#1b3a5c" stroke-width="1.2"/>
-    <path d="M 52 22 C 56 18, 62 16, 68 18 C 74 20, 78 25, 80 32 C 82 38, 81 44, 78 48 C 76 50, 73 50, 71 48 C 70 46, 70 43, 68 41 C 66 39, 63 40, 61 42 C 59 44, 58 47, 56 49 C 54 51, 52 51, 51 49 C 50 47, 51 44, 52 41 C 53 38, 54 35, 54 32 C 54 29, 53 26, 52 22 Z" fill="#f97316" stroke="#1b3a5c" stroke-width="3" stroke-linejoin="round"/>
-    <path d="M 56 24 C 60 22, 66 21, 71 24" fill="none" stroke="#1b3a5c" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
-    <path d="M 57 30 C 62 28, 68 28, 73 31" fill="none" stroke="#1b3a5c" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
-    <path d="M 56 37 C 60 36, 65 36, 69 39" fill="none" stroke="#1b3a5c" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
-    <path d="M 42 50 C 44 54, 46 58, 50 60" fill="none" stroke="#1b3a5c" stroke-width="2" stroke-linecap="round" opacity="0.4"/>
-</svg>`,
-            'wB': `<svg class="piece-svg" viewBox="0 0 100 100">
-                <ellipse cx="50" cy="85" rx="27" ry="6" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5"/>
-                <path d="M 33 85 C 33 70, 42 63, 43 55 L 57 55 C 58 63, 67 70, 67 85 Z" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5" stroke-linejoin="round"/>
-                <ellipse cx="50" cy="55" rx="16" ry="4.5" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5"/>
-                <path d="M 50 18 C 36 28, 33 46, 50 55 C 67 46, 64 28, 50 18 Z" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5" stroke-linejoin="round"/>
-                <circle cx="50" cy="14" r="4.5" fill="#ffffff" stroke="#2b2b2b" stroke-width="4"/>
-                <path d="M 44 32 L 60 41" fill="none" stroke="#2b2b2b" stroke-width="4" stroke-linecap="round"/>
-            </svg>`,
-            'wQ': `<svg class="piece-svg" viewBox="0 0 100 100">
-                <ellipse cx="50" cy="86" rx="29" ry="6" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5"/>
-                <path d="M 28 86 C 30 68, 38 58, 41 52 L 59 52 C 62 58, 70 68, 72 86 Z" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5"/>
-                <ellipse cx="50" cy="52" rx="20" ry="5" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5"/>
-                <path d="M 24 50 L 19 28 L 36 39 L 50 22 L 64 39 L 81 28 L 76 50 Z" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5" stroke-linejoin="round"/>
-                <circle cx="19" cy="24" r="4" fill="#ffffff" stroke="#2b2b2b" stroke-width="3.5"/>
-                <circle cx="50" cy="18" r="4" fill="#ffffff" stroke="#2b2b2b" stroke-width="3.5"/>
-                <circle cx="81" cy="24" r="4" fill="#ffffff" stroke="#2b2b2b" stroke-width="3.5"/>
-            </svg>`,
-            'wK': `<svg class="piece-svg" viewBox="0 0 100 100">
-                <ellipse cx="50" cy="86" rx="30" ry="6" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5"/>
-                <path d="M 28 86 C 30 68, 38 58, 41 52 L 59 52 C 62 58, 70 68, 72 86 Z" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5"/>
-                <ellipse cx="50" cy="52" rx="22" ry="5.5" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5"/>
-                <path d="M 26 50 C 24 34, 38 27, 50 27 C 62 27, 76 34, 74 50 Z" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5" stroke-linejoin="round"/>
-                <path d="M 50 10 L 50 23 M 43.5 15 L 56.5 15" fill="none" stroke="#2b2b2b" stroke-width="5" stroke-linecap="square"/>
-            </svg>`,
-            'bP': `<svg class="piece-svg" viewBox="0 0 100 100">
-                <ellipse cx="50" cy="85" rx="27" ry="6" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5"/>
-                <path d="M 33 85 C 33 65, 40 50, 43 45 L 57 45 C 60 50, 67 65, 67 85 Z" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5" stroke-linejoin="round"/>
-                <ellipse cx="50" cy="45" rx="17" ry="5" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5"/>
-                <circle cx="50" cy="27" r="15" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5"/>
-                <ellipse cx="46" cy="23" rx="4" ry="2.5" fill="#ffffff" opacity="0.18"/>
-            </svg>`,
-            'bR': `<svg class="piece-svg" viewBox="0 0 100 100">
-                <rect x="20" y="78" width="60" height="13" rx="4" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5"/>
-                <path d="M 27 78 L 31 43 L 69 43 L 73 78 Z" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5" stroke-linejoin="round"/>
-                <rect x="22" y="32" width="56" height="11" rx="2" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5"/>
-                <path d="M 22 32 L 22 17 L 34 17 L 34 25 L 44 25 L 44 17 L 56 17 L 56 25 L 66 25 L 66 17 L 78 17 L 78 32 Z" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5" stroke-linejoin="round"/>
-            </svg>`,
-            'bN': `<svg class="piece-svg" viewBox="0 0 100 100">
-                <ellipse cx="50" cy="85" rx="28" ry="6" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5"/>
-                <path d="M 25 85 C 25 76, 23 60, 21 53 C 20 48, 25 45, 30 45 C 33 45, 34 40, 31 34 C 33 30, 38 23, 47 16 C 53 11, 57 14, 57 18 C 65 14, 71 18, 73 24 C 77 34, 78 50, 77 65 C 76 75, 75 80, 75 85 Z" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5" stroke-linejoin="round"/>
-                <circle cx="42" cy="27" r="3.5" fill="#f8fafc"/>
-                <path d="M 24 53 C 34 56, 42 63, 44 76" fill="none" stroke="#1e1d1b" stroke-width="4" stroke-linecap="round"/>
-            </svg>`,
-            'bB': `<svg class="piece-svg" viewBox="0 0 100 100">
-                <ellipse cx="50" cy="85" rx="27" ry="6" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5"/>
-                <path d="M 33 85 C 33 70, 42 63, 43 55 L 57 55 C 58 63, 67 70, 67 85 Z" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5" stroke-linejoin="round"/>
-                <ellipse cx="50" cy="55" rx="16" ry="4.5" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5"/>
-                <path d="M 50 18 C 36 28, 33 46, 50 55 C 67 46, 64 28, 50 18 Z" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5" stroke-linejoin="round"/>
-                <circle cx="50" cy="14" r="4.5" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4"/>
-                <path d="M 44 32 L 60 41" fill="none" stroke="#f8fafc" stroke-width="4" stroke-linecap="round"/>
-            </svg>`,
-            'bQ': `<svg class="piece-svg" viewBox="0 0 100 100">
-                <ellipse cx="50" cy="86" rx="29" ry="6" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5"/>
-                <path d="M 28 86 C 30 68, 38 58, 41 52 L 59 52 C 62 58, 70 68, 72 86 Z" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5"/>
-                <ellipse cx="50" cy="52" rx="20" ry="5" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5"/>
-                <path d="M 24 50 L 19 28 L 36 39 L 50 22 L 64 39 L 81 28 L 76 50 Z" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5" stroke-linejoin="round"/>
-                <circle cx="19" cy="24" r="4" fill="#3d3b37" stroke="#1e1d1b" stroke-width="3.5"/>
-                <circle cx="50" cy="18" r="4" fill="#3d3b37" stroke="#1e1d1b" stroke-width="3.5"/>
-                <circle cx="81" cy="24" r="4" fill="#3d3b37" stroke="#1e1d1b" stroke-width="3.5"/>
-            </svg>`,
-            'bK': `<svg class="piece-svg" viewBox="0 0 100 100">
-                <ellipse cx="50" cy="86" rx="30" ry="6" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5"/>
-                <path d="M 28 86 C 30 68, 38 58, 41 52 L 59 52 C 62 58, 70 68, 72 86 Z" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5"/>
-                <ellipse cx="50" cy="52" rx="22" ry="5.5" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5"/>
-                <path d="M 26 50 C 24 34, 38 27, 50 27 C 62 27, 76 34, 74 50 Z" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5" stroke-linejoin="round"/>
-                <path d="M 50 10 L 50 23 M 43.5 15 L 56.5 15" fill="none" stroke="#f8fafc" stroke-width="5" stroke-linecap="square"/>
-            </svg>`
+            'wP': `<svg class="piece-svg" viewBox="0 0 100 100"><ellipse cx="50" cy="85" rx="27" ry="6" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5"/><path d="M 33 85 C 33 65, 40 50, 43 45 L 57 45 C 60 50, 67 65, 67 85 Z" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5" stroke-linejoin="round"/><ellipse cx="50" cy="45" rx="17" ry="5" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5"/><circle cx="50" cy="27" r="15" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5"/><ellipse cx="46" cy="23" rx="4" ry="2.5" fill="#ffffff" opacity="0.6"/></svg>`,
+            'wR': `<svg class="piece-svg" viewBox="0 0 100 100"><rect x="20" y="78" width="60" height="13" rx="4" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5"/><path d="M 27 78 L 31 43 L 69 43 L 73 78 Z" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5" stroke-linejoin="round"/><rect x="22" y="32" width="56" height="11" rx="2" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5"/><path d="M 22 32 L 22 17 L 34 17 L 34 25 L 44 25 L 44 17 L 56 17 L 56 25 L 66 25 L 66 17 L 78 17 L 78 32 Z" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5" stroke-linejoin="round"/></svg>`,
+            'wN': `<svg class="piece-svg" viewBox="0 0 100 100"><ellipse cx="50" cy="89" rx="32" ry="4.5" fill="rgba(0,0,0,0.15)"/><path d="M 18 84 C 18 80, 20 77, 24 76 L 76 76 C 80 77, 82 80, 82 84 C 82 87, 80 89, 76 89 L 24 89 C 20 89, 18 87, 18 84 Z" fill="#ffffff" stroke="#1b3a5c" stroke-width="3.5" stroke-linejoin="round"/><path d="M 26 76 L 28 68 C 28 65, 30 63, 33 63 L 67 63 C 70 63, 72 65, 72 68 L 74 76 Z" fill="#ffffff" stroke="#1b3a5c" stroke-width="3.5" stroke-linejoin="round"/><path d="M 30 63 C 30 58, 32 55, 35 55 L 65 55 C 68 55, 70 58, 70 63 Z" fill="#ffffff" stroke="#1b3a5c" stroke-width="3.5" stroke-linejoin="round"/><path d="M 38 55 C 34 52, 32 47, 32 42 C 32 36, 34 31, 38 27 C 42 23, 47 21, 52 22 C 56 23, 59 26, 60 30 C 61 33, 60 35, 57 37 C 54 39, 51 42, 50 46 C 49 50, 50 54, 52 57 L 62 55 C 64 54, 66 55, 66 58 C 66 60, 64 62, 62 62 L 38 62 C 36 62, 35 60, 35 58 C 35 56, 36 55, 38 55 Z" fill="#ffffff" stroke="#1b3a5c" stroke-width="3.5" stroke-linejoin="round"/><path d="M 44 22 L 46 14 L 50 21 Z" fill="#ffffff" stroke="#1b3a5c" stroke-width="3" stroke-linejoin="round"/><path d="M 32 42 C 28 44, 24 47, 22 51 C 21 53, 22 55, 24 56 C 26 57, 29 56, 31 54" fill="#ffffff" stroke="#1b3a5c" stroke-width="3.5" stroke-linejoin="round"/><circle cx="27" cy="50" r="1.5" fill="#1b3a5c"/><ellipse cx="43" cy="34" rx="3" ry="2.2" fill="#e63946" stroke="#1b3a5c" stroke-width="1.2"/><path d="M 52 22 C 56 18, 62 16, 68 18 C 74 20, 78 25, 80 32 C 82 38, 81 44, 78 48 C 76 50, 73 50, 71 48 C 70 46, 70 43, 68 41 C 66 39, 63 40, 61 42 C 59 44, 58 47, 56 49 C 54 51, 52 51, 51 49 C 50 47, 51 44, 52 41 C 53 38, 54 35, 54 32 C 54 29, 53 26, 52 22 Z" fill="#f97316" stroke="#1b3a5c" stroke-width="3" stroke-linejoin="round"/></svg>`,
+            'wB': `<svg class="piece-svg" viewBox="0 0 100 100"><ellipse cx="50" cy="85" rx="27" ry="6" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5"/><path d="M 33 85 C 33 70, 42 63, 43 55 L 57 55 C 58 63, 67 70, 67 85 Z" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5" stroke-linejoin="round"/><ellipse cx="50" cy="55" rx="16" ry="4.5" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5"/><path d="M 50 18 C 36 28, 33 46, 50 55 C 67 46, 64 28, 50 18 Z" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5" stroke-linejoin="round"/><circle cx="50" cy="14" r="4.5" fill="#ffffff" stroke="#2b2b2b" stroke-width="4"/><path d="M 44 32 L 60 41" fill="none" stroke="#2b2b2b" stroke-width="4" stroke-linecap="round"/></svg>`,
+            'wQ': `<svg class="piece-svg" viewBox="0 0 100 100"><ellipse cx="50" cy="86" rx="29" ry="6" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5"/><path d="M 28 86 C 30 68, 38 58, 41 52 L 59 52 C 62 58, 70 68, 72 86 Z" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5"/><ellipse cx="50" cy="52" rx="20" ry="5" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5"/><path d="M 24 50 L 19 28 L 36 39 L 50 22 L 64 39 L 81 28 L 76 50 Z" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5" stroke-linejoin="round"/><circle cx="19" cy="24" r="4" fill="#ffffff" stroke="#2b2b2b" stroke-width="3.5"/><circle cx="50" cy="18" r="4" fill="#ffffff" stroke="#2b2b2b" stroke-width="3.5"/><circle cx="81" cy="24" r="4" fill="#ffffff" stroke="#2b2b2b" stroke-width="3.5"/></svg>`,
+            'wK': `<svg class="piece-svg" viewBox="0 0 100 100"><ellipse cx="50" cy="86" rx="30" ry="6" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5"/><path d="M 28 86 C 30 68, 38 58, 41 52 L 59 52 C 62 58, 70 68, 72 86 Z" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5"/><ellipse cx="50" cy="52" rx="22" ry="5.5" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5"/><path d="M 26 50 C 24 34, 38 27, 50 27 C 62 27, 76 34, 74 50 Z" fill="#ffffff" stroke="#2b2b2b" stroke-width="4.5" stroke-linejoin="round"/><path d="M 50 10 L 50 23 M 43.5 15 L 56.5 15" fill="none" stroke="#2b2b2b" stroke-width="5" stroke-linecap="square"/></svg>`,
+            'bP': `<svg class="piece-svg" viewBox="0 0 100 100"><ellipse cx="50" cy="85" rx="27" ry="6" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5"/><path d="M 33 85 C 33 65, 40 50, 43 45 L 57 45 C 60 50, 67 65, 67 85 Z" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5" stroke-linejoin="round"/><ellipse cx="50" cy="45" rx="17" ry="5" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5"/><circle cx="50" cy="27" r="15" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5"/><ellipse cx="46" cy="23" rx="4" ry="2.5" fill="#ffffff" opacity="0.18"/></svg>`,
+            'bR': `<svg class="piece-svg" viewBox="0 0 100 100"><rect x="20" y="78" width="60" height="13" rx="4" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5"/><path d="M 27 78 L 31 43 L 69 43 L 73 78 Z" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5" stroke-linejoin="round"/><rect x="22" y="32" width="56" height="11" rx="2" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5"/><path d="M 22 32 L 22 17 L 34 17 L 34 25 L 44 25 L 44 17 L 56 17 L 56 25 L 66 25 L 66 17 L 78 17 L 78 32 Z" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5" stroke-linejoin="round"/></svg>`,
+            'bN': `<svg class="piece-svg" viewBox="0 0 100 100"><ellipse cx="50" cy="85" rx="28" ry="6" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5"/><path d="M 25 85 C 25 76, 23 60, 21 53 C 20 48, 25 45, 30 45 C 33 45, 34 40, 31 34 C 33 30, 38 23, 47 16 C 53 11, 57 14, 57 18 C 65 14, 71 18, 73 24 C 77 34, 78 50, 77 65 C 76 75, 75 80, 75 85 Z" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5" stroke-linejoin="round"/><circle cx="42" cy="27" r="3.5" fill="#f8fafc"/><path d="M 24 53 C 34 56, 42 63, 44 76" fill="none" stroke="#1e1d1b" stroke-width="4" stroke-linecap="round"/></svg>`,
+            'bB': `<svg class="piece-svg" viewBox="0 0 100 100"><ellipse cx="50" cy="85" rx="27" ry="6" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5"/><path d="M 33 85 C 33 70, 42 63, 43 55 L 57 55 C 58 63, 67 70, 67 85 Z" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5" stroke-linejoin="round"/><ellipse cx="50" cy="55" rx="16" ry="4.5" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5"/><path d="M 50 18 C 36 28, 33 46, 50 55 C 67 46, 64 28, 50 18 Z" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5" stroke-linejoin="round"/><circle cx="50" cy="14" r="4.5" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4"/><path d="M 44 32 L 60 41" fill="none" stroke="#f8fafc" stroke-width="4" stroke-linecap="round"/></svg>`,
+            'bQ': `<svg class="piece-svg" viewBox="0 0 100 100"><ellipse cx="50" cy="86" rx="29" ry="6" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5"/><path d="M 28 86 C 30 68, 38 58, 41 52 L 59 52 C 62 58, 70 68, 72 86 Z" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5"/><ellipse cx="50" cy="52" rx="20" ry="5" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5"/><path d="M 24 50 L 19 28 L 36 39 L 50 22 L 64 39 L 81 28 L 76 50 Z" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5" stroke-linejoin="round"/><circle cx="19" cy="24" r="4" fill="#3d3b37" stroke="#1e1d1b" stroke-width="3.5"/><circle cx="50" cy="18" r="4" fill="#3d3b37" stroke="#1e1d1b" stroke-width="3.5"/><circle cx="81" cy="24" r="4" fill="#3d3b37" stroke="#1e1d1b" stroke-width="3.5"/></svg>`,
+            'bK': `<svg class="piece-svg" viewBox="0 0 100 100"><ellipse cx="50" cy="86" rx="30" ry="6" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5"/><path d="M 28 86 C 30 68, 38 58, 41 52 L 59 52 C 62 58, 70 68, 72 86 Z" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5"/><ellipse cx="50" cy="52" rx="22" ry="5.5" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5"/><path d="M 26 50 C 24 34, 38 27, 50 27 C 62 27, 76 34, 74 50 Z" fill="#3d3b37" stroke="#1e1d1b" stroke-width="4.5" stroke-linejoin="round"/><path d="M 50 10 L 50 23 M 43.5 15 L 56.5 15" fill="none" stroke="#f8fafc" stroke-width="5" stroke-linecap="square"/></svg>`
         };
 
         const PIECE_VALUES = { 'P': 100, 'N': 320, 'B': 330, 'R': 500, 'Q': 900, 'K': 20000 };
 
         /* ==========================================================
-           3. ÂM THANH
+           SOUND
            ========================================================== */
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         let soundEnabled = true;
@@ -620,12 +663,9 @@
             setTimeout(() => { playSoundTone(987.77, 'square', 0.25, 0.28); }, 90);
         }
 
-        // Âm thanh bắt quân mạnh hơn (thêm tiếng nổ nhỏ)
         function playMoveAudio(isCapture = false, isCheck = false) {
-            if (isCheck) {
-                playCheckAlertAudio();
-            } else if (isCapture) {
-                // Tiếng va chạm + tiếng nổ nhỏ
+            if (isCheck) { playCheckAlertAudio(); }
+            else if (isCapture) {
                 playSoundTone(160, 'square', 0.12, 0.28);
                 playSoundTone(80, 'sawtooth', 0.18, 0.22);
                 setTimeout(() => playSoundTone(320, 'triangle', 0.08, 0.15), 60);
@@ -637,12 +677,9 @@
         function playVictorySound() {
             if (!soundEnabled) return;
             const sequence = [
-                { f: 523.25, d: 0.15, wait: 0 },
-                { f: 659.25, d: 0.15, wait: 130 },
-                { f: 783.99, d: 0.15, wait: 260 },
-                { f: 1046.5, d: 0.45, wait: 390 },
-                { f: 880.00, d: 0.18, wait: 800 },
-                { f: 1046.5, d: 0.70, wait: 1000 }
+                { f: 523.25, d: 0.15, wait: 0 }, { f: 659.25, d: 0.15, wait: 130 },
+                { f: 783.99, d: 0.15, wait: 260 }, { f: 1046.5, d: 0.45, wait: 390 },
+                { f: 880.00, d: 0.18, wait: 800 }, { f: 1046.5, d: 0.70, wait: 1000 }
             ];
             sequence.forEach(s => { setTimeout(() => playSoundTone(s.f, 'triangle', s.d, 0.28), s.wait); });
         }
@@ -654,8 +691,23 @@
             setTimeout(() => playSoundTone(220, 'sawtooth', 0.6, 0.3), 550);
         }
 
+        let ringtoneInterval = null;
+        function startRingtone() {
+            if (!soundEnabled) return;
+            stopRingtone();
+            const playRing = () => {
+                playSoundTone(880, 'sine', 0.4, 0.3);
+                setTimeout(() => playSoundTone(1100, 'sine', 0.4, 0.3), 200);
+            };
+            playRing();
+            ringtoneInterval = setInterval(playRing, 1500);
+        }
+        function stopRingtone() {
+            if (ringtoneInterval) { clearInterval(ringtoneInterval); ringtoneInterval = null; }
+        }
+
         /* ==========================================================
-           4. PHÁO HOA
+           FIREWORKS
            ========================================================== */
         const canvas = document.getElementById('fireworksCanvas');
         const ctx = canvas.getContext('2d');
@@ -664,8 +716,7 @@
         let fireworkTimer = null;
 
         function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
+            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
         }
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
@@ -675,48 +726,31 @@
                 this.x = x; this.y = y; this.color = color;
                 const angle = Math.random() * Math.PI * 2;
                 const speed = Math.random() * 6.5 + 2.5;
-                this.vx = Math.cos(angle) * speed;
-                this.vy = Math.sin(angle) * speed;
-                this.alpha = 1;
-                this.decay = Math.random() * 0.016 + 0.009;
-                this.gravity = 0.14;
-                this.size = Math.random() * 3.5 + 2;
+                this.vx = Math.cos(angle) * speed; this.vy = Math.sin(angle) * speed;
+                this.alpha = 1; this.decay = Math.random() * 0.016 + 0.009;
+                this.gravity = 0.14; this.size = Math.random() * 3.5 + 2;
             }
-            update() {
-                this.vx *= 0.98; this.vy += this.gravity;
-                this.x += this.vx; this.y += this.vy;
-                this.alpha -= this.decay;
-            }
+            update() { this.vx *= 0.98; this.vy += this.gravity; this.x += this.vx; this.y += this.vy; this.alpha -= this.decay; }
             draw(ctx) {
-                ctx.save();
-                ctx.globalAlpha = Math.max(0, this.alpha);
-                ctx.fillStyle = this.color;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.restore();
+                ctx.save(); ctx.globalAlpha = Math.max(0, this.alpha);
+                ctx.fillStyle = this.color; ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill(); ctx.restore();
             }
         }
 
-        function createFirework(targetX, targetY) {
+        function createFirework(x, y) {
             const colors = ['#22c55e', '#eab308', '#ef4444', '#38bdf8', '#a855f7', '#f97316'];
-            for (let i = 0; i < 70; i++) {
-                const color = colors[Math.floor(Math.random() * colors.length)];
-                particles.push(new Particle(targetX, targetY, color));
-            }
+            for (let i = 0; i < 70; i++) particles.push(new Particle(x, y, colors[Math.floor(Math.random() * colors.length)]));
         }
 
         function startFireworks() {
-            fireworksActive = true;
-            particles = [];
+            fireworksActive = true; particles = [];
             createFirework(canvas.width * 0.5, canvas.height * 0.35);
             setTimeout(() => createFirework(canvas.width * 0.35, canvas.height * 0.45), 250);
             setTimeout(() => createFirework(canvas.width * 0.65, canvas.height * 0.4), 500);
             fireworkTimer = setInterval(() => {
                 if (!fireworksActive) return;
-                const rx = canvas.width * (0.2 + Math.random() * 0.6);
-                const ry = canvas.height * (0.2 + Math.random() * 0.4);
-                createFirework(rx, ry);
+                createFirework(canvas.width * (0.2 + Math.random() * 0.6), canvas.height * (0.2 + Math.random() * 0.4));
             }, 650);
             animateFireworks();
         }
@@ -729,221 +763,124 @@
         }
 
         function animateFireworks() {
-            if (!fireworksActive && particles.length === 0) {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                return;
-            }
+            if (!fireworksActive && particles.length === 0) { ctx.clearRect(0, 0, canvas.width, canvas.height); return; }
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             for (let i = particles.length - 1; i >= 0; i--) {
-                const p = particles[i];
-                p.update();
-                p.draw(ctx);
+                const p = particles[i]; p.update(); p.draw(ctx);
                 if (p.alpha <= 0) particles.splice(i, 1);
             }
             requestAnimationFrame(animateFireworks);
         }
 
         /* ==========================================================
-           4b. HIỆU ỨNG CHIẾN ĐẤU (NỔ, TIA LỬA, KHÓI) KHI BẮT QUÂN
+           COMBAT EFFECTS
            ========================================================== */
         const combatCanvas = document.getElementById('combatCanvas');
         const combatCtx = combatCanvas.getContext('2d');
         let combatParticles = [];
-        let combatActive = false;
         let combatAnimFrame = null;
+        let shockwaves = [];
 
         function resizeCombatCanvas() {
-            combatCanvas.width = window.innerWidth;
-            combatCanvas.height = window.innerHeight;
+            combatCanvas.width = window.innerWidth; combatCanvas.height = window.innerHeight;
         }
         window.addEventListener('resize', resizeCombatCanvas);
         resizeCombatCanvas();
 
-        // Hạt tia lửa
         class Spark {
             constructor(x, y) {
                 this.x = x; this.y = y;
                 const angle = Math.random() * Math.PI * 2;
                 const speed = Math.random() * 8 + 3;
-                this.vx = Math.cos(angle) * speed;
-                this.vy = Math.sin(angle) * speed;
-                this.alpha = 1;
-                this.decay = Math.random() * 0.03 + 0.015;
+                this.vx = Math.cos(angle) * speed; this.vy = Math.sin(angle) * speed;
+                this.alpha = 1; this.decay = Math.random() * 0.03 + 0.015;
                 this.size = Math.random() * 2.5 + 1.2;
-                // Màu tia lửa: vàng cam đỏ
                 const colors = ['#fbbf24', '#f97316', '#ef4444', '#facc15', '#fb923c'];
                 this.color = colors[Math.floor(Math.random() * colors.length)];
                 this.gravity = 0.25;
             }
-            update() {
-                this.vx *= 0.96;
-                this.vy *= 0.96;
-                this.vy += this.gravity;
-                this.x += this.vx;
-                this.y += this.vy;
-                this.alpha -= this.decay;
-            }
+            update() { this.vx *= 0.96; this.vy *= 0.96; this.vy += this.gravity; this.x += this.vx; this.y += this.vy; this.alpha -= this.decay; }
             draw(ctx) {
-                ctx.save();
-                ctx.globalAlpha = Math.max(0, this.alpha);
-                ctx.fillStyle = this.color;
-                ctx.shadowBlur = 12;
-                ctx.shadowColor = this.color;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.restore();
+                ctx.save(); ctx.globalAlpha = Math.max(0, this.alpha);
+                ctx.fillStyle = this.color; ctx.shadowBlur = 12; ctx.shadowColor = this.color;
+                ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill(); ctx.restore();
             }
         }
 
-        // Hạt khói
         class Smoke {
             constructor(x, y) {
                 this.x = x + (Math.random() - 0.5) * 20;
                 this.y = y + (Math.random() - 0.5) * 20;
                 this.vx = (Math.random() - 0.5) * 1.5;
                 this.vy = -Math.random() * 1.5 - 0.8;
-                this.alpha = 0.75;
-                this.decay = Math.random() * 0.012 + 0.006;
+                this.alpha = 0.75; this.decay = Math.random() * 0.012 + 0.006;
                 this.size = Math.random() * 18 + 12;
                 this.growth = Math.random() * 0.6 + 0.3;
-                this.rotation = Math.random() * Math.PI * 2;
-                this.rotSpeed = (Math.random() - 0.5) * 0.05;
             }
-            update() {
-                this.x += this.vx;
-                this.y += this.vy;
-                this.vx *= 0.98;
-                this.vy *= 0.98;
-                this.size += this.growth;
-                this.alpha -= this.decay;
-                this.rotation += this.rotSpeed;
-            }
+            update() { this.x += this.vx; this.y += this.vy; this.vx *= 0.98; this.vy *= 0.98; this.size += this.growth; this.alpha -= this.decay; }
             draw(ctx) {
-                ctx.save();
-                ctx.globalAlpha = Math.max(0, this.alpha);
+                ctx.save(); ctx.globalAlpha = Math.max(0, this.alpha);
                 const grad = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size);
                 grad.addColorStop(0, 'rgba(180, 180, 190, 0.7)');
                 grad.addColorStop(0.5, 'rgba(120, 120, 130, 0.4)');
                 grad.addColorStop(1, 'rgba(80, 80, 90, 0)');
-                ctx.fillStyle = grad;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.restore();
+                ctx.fillStyle = grad; ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill(); ctx.restore();
             }
         }
 
-        // Hạt flash nổ
         class Flash {
             constructor(x, y) {
                 this.x = x; this.y = y;
-                this.alpha = 1;
-                this.decay = 0.06;
+                this.alpha = 1; this.decay = 0.06;
                 this.size = 10;
-                this.maxSize = 90;
             }
-            update() {
-                this.size += 8;
-                this.alpha -= this.decay;
-            }
+            update() { this.size += 8; this.alpha -= this.decay; }
             draw(ctx) {
-                ctx.save();
-                ctx.globalAlpha = Math.max(0, this.alpha);
+                ctx.save(); ctx.globalAlpha = Math.max(0, this.alpha);
                 const grad = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size);
                 grad.addColorStop(0, 'rgba(255, 255, 255, 0.95)');
                 grad.addColorStop(0.3, 'rgba(255, 220, 100, 0.8)');
                 grad.addColorStop(0.6, 'rgba(255, 120, 0, 0.4)');
                 grad.addColorStop(1, 'rgba(255, 60, 0, 0)');
-                ctx.fillStyle = grad;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.restore();
+                ctx.fillStyle = grad; ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill(); ctx.restore();
             }
         }
 
-        // Tạo hiệu ứng chiến đấu tại vị trí (x, y) - tọa độ màn hình
         function spawnCaptureEffect(x, y) {
-            combatActive = true;
-
-            // Flash nổ
             combatParticles.push(new Flash(x, y));
-
-            // Tia lửa (25 hạt)
-            for (let i = 0; i < 25; i++) {
-                combatParticles.push(new Spark(x, y));
-            }
-
-            // Khói (10 hạt)
-            for (let i = 0; i < 10; i++) {
-                combatParticles.push(new Smoke(x, y));
-            }
-
-            // Vòng sóng xung kích
-            spawnShockwave(x, y);
-
-            // Chạy animation nếu chưa chạy
-            if (!combatAnimFrame) {
-                animateCombat();
-            }
-        }
-
-        // Vòng sóng xung kích (shockwave)
-        let shockwaves = [];
-        function spawnShockwave(x, y) {
-            shockwaves.push({
-                x, y,
-                radius: 5,
-                maxRadius: 80,
-                alpha: 0.9,
-                speed: 4
-            });
+            for (let i = 0; i < 25; i++) combatParticles.push(new Spark(x, y));
+            for (let i = 0; i < 10; i++) combatParticles.push(new Smoke(x, y));
+            shockwaves.push({ x, y, radius: 5, maxRadius: 80, alpha: 0.9, speed: 4 });
+            if (!combatAnimFrame) animateCombat();
         }
 
         function animateCombat() {
             combatCtx.clearRect(0, 0, combatCanvas.width, combatCanvas.height);
-
-            // Vẽ shockwaves
             for (let i = shockwaves.length - 1; i >= 0; i--) {
-                const sw = shockwaves[i];
-                sw.radius += sw.speed;
-                sw.alpha -= 0.035;
-                if (sw.alpha <= 0 || sw.radius >= sw.maxRadius) {
-                    shockwaves.splice(i, 1);
-                    continue;
-                }
-                combatCtx.save();
-                combatCtx.globalAlpha = Math.max(0, sw.alpha);
-                combatCtx.strokeStyle = 'rgba(255, 200, 100, 0.9)';
-                combatCtx.lineWidth = 3;
-                combatCtx.shadowBlur = 15;
-                combatCtx.shadowColor = 'rgba(255, 150, 50, 0.9)';
-                combatCtx.beginPath();
-                combatCtx.arc(sw.x, sw.y, sw.radius, 0, Math.PI * 2);
-                combatCtx.stroke();
-                combatCtx.restore();
+                const sw = shockwaves[i]; sw.radius += sw.speed; sw.alpha -= 0.035;
+                if (sw.alpha <= 0 || sw.radius >= sw.maxRadius) { shockwaves.splice(i, 1); continue; }
+                combatCtx.save(); combatCtx.globalAlpha = Math.max(0, sw.alpha);
+                combatCtx.strokeStyle = 'rgba(255, 200, 100, 0.9)'; combatCtx.lineWidth = 3;
+                combatCtx.shadowBlur = 15; combatCtx.shadowColor = 'rgba(255, 150, 50, 0.9)';
+                combatCtx.beginPath(); combatCtx.arc(sw.x, sw.y, sw.radius, 0, Math.PI * 2);
+                combatCtx.stroke(); combatCtx.restore();
             }
-
-            // Vẽ particles
             for (let i = combatParticles.length - 1; i >= 0; i--) {
-                const p = combatParticles[i];
-                p.update();
-                p.draw(combatCtx);
+                const p = combatParticles[i]; p.update(); p.draw(combatCtx);
                 if (p.alpha <= 0) combatParticles.splice(i, 1);
             }
-
             if (combatParticles.length > 0 || shockwaves.length > 0) {
                 combatAnimFrame = requestAnimationFrame(animateCombat);
             } else {
                 combatCtx.clearRect(0, 0, combatCanvas.width, combatCanvas.height);
-                combatActive = false;
                 combatAnimFrame = null;
             }
         }
 
         /* ==========================================================
-           5. LOGIC CỜ VUA
+           CHESS LOGIC
            ========================================================== */
         function getStartingBoard() {
             return [
@@ -985,10 +922,8 @@
 
         function formatClockTime(ms) {
             if (ms < 0) ms = 0;
-            const totalSeconds = Math.floor(ms / 1000);
-            const m = Math.floor(totalSeconds / 60);
-            const s = totalSeconds % 60;
-            return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+            const t = Math.floor(ms / 1000);
+            return `${String(Math.floor(t / 60)).padStart(2, '0')}:${String(t % 60).padStart(2, '0')}`;
         }
 
         function updateClockDisplay() {
@@ -1036,29 +971,20 @@
 
         function resetClocks() {
             stopClock();
-            whiteTimeMs = INITIAL_TIME_MS;
-            blackTimeMs = INITIAL_TIME_MS;
+            whiteTimeMs = INITIAL_TIME_MS; blackTimeMs = INITIAL_TIME_MS;
             updateClockDisplay();
         }
 
         function onTimeUp(loserColor) {
             if (isGameOver) return;
-            isGameOver = true;
-            stopClock();
+            isGameOver = true; stopClock();
             const winnerName = loserColor === 'w' ? 'Bên Đen' : 'Bên Trắng';
             const loserName = loserColor === 'w' ? 'Trắng' : 'Đen';
             if (gameMode === 'online' && roomFirebaseRef) {
-                roomFirebaseRef.update({
-                    timeUpBy: loserColor,
-                    winnerByTime: loserColor === 'w' ? 'b' : 'w'
-                });
+                roomFirebaseRef.update({ timeUpBy: loserColor, winnerByTime: loserColor === 'w' ? 'b' : 'w' });
             }
             playTimeUpSound();
-            showVictoryCelebration(
-                `${winnerName} Thắng Do Hết Thời Gian!`,
-                `Bên ${loserName} đã sử dụng hết 10 phút. Trận đấu kết thúc!`,
-                true
-            );
+            showVictoryCelebration(`${winnerName} Thắng Do Hết Thời Gian!`, `Bên ${loserName} đã sử dụng hết 10 phút.`, true);
             render();
         }
 
@@ -1067,69 +993,51 @@
         function getRawMoves(r, c, customBoard = board) {
             const piece = customBoard[r][c];
             if (!piece) return [];
-            const color = piece[0];
-            const type = piece[1];
+            const color = piece[0], type = piece[1];
             const moves = [];
             const addMove = (tr, tc) => {
                 if (!isInside(tr, tc)) return false;
                 const target = customBoard[tr][tc];
                 if (!target) { moves.push({ r: tr, c: tc }); return true; }
-                if (target[0] !== color) { moves.push({ r: tr, c: tc }); }
+                if (target[0] !== color) moves.push({ r: tr, c: tc });
                 return false;
             };
-
             if (type === 'P') {
                 const dir = (color === 'w') ? -1 : 1;
                 const startRow = (color === 'w') ? 6 : 1;
                 if (isInside(r + dir, c) && !customBoard[r + dir][c]) {
                     moves.push({ r: r + dir, c: c });
-                    if (r === startRow && !customBoard[r + 2 * dir][c]) {
-                        moves.push({ r: r + 2 * dir, c: c });
-                    }
+                    if (r === startRow && !customBoard[r + 2 * dir][c]) moves.push({ r: r + 2 * dir, c: c });
                 }
                 for (let dc of [-1, 1]) {
                     let tr = r + dir, tc = c + dc;
-                    if (isInside(tr, tc) && customBoard[tr][tc] && customBoard[tr][tc][0] !== color) {
-                        moves.push({ r: tr, c: tc });
-                    }
+                    if (isInside(tr, tc) && customBoard[tr][tc] && customBoard[tr][tc][0] !== color) moves.push({ r: tr, c: tc });
                 }
             }
-
             if (type === 'N') {
-                const knightOffsets = [[-2, -1], [-2, 1], [-1, -2], [-1, 2], [1, -2], [1, 2], [2, -1], [2, 1]];
-                for (let [dr, dc] of knightOffsets) addMove(r + dr, c + dc);
+                for (let [dr, dc] of [[-2, -1], [-2, 1], [-1, -2], [-1, 2], [1, -2], [1, 2], [2, -1], [2, 1]]) addMove(r + dr, c + dc);
             }
-
             if (type === 'B' || type === 'Q') {
-                const directions = [[-1, -1], [-1, 1], [1, -1], [1, 1]];
-                for (let [dr, dc] of directions) {
+                for (let [dr, dc] of [[-1, -1], [-1, 1], [1, -1], [1, 1]]) {
                     let tr = r + dr, tc = c + dc;
                     while (isInside(tr, tc)) { if (!addMove(tr, tc)) break; tr += dr; tc += dc; }
                 }
             }
-
             if (type === 'R' || type === 'Q') {
-                const directions = [[-1, 0], [1, 0], [0, -1], [0, 1]];
-                for (let [dr, dc] of directions) {
+                for (let [dr, dc] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) {
                     let tr = r + dr, tc = c + dc;
                     while (isInside(tr, tc)) { if (!addMove(tr, tc)) break; tr += dr; tc += dc; }
                 }
             }
-
             if (type === 'K') {
-                const kingOffsets = [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]];
-                for (let [dr, dc] of kingOffsets) addMove(r + dr, c + dc);
+                for (let [dr, dc] of [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]]) addMove(r + dr, c + dc);
             }
-
             return moves;
         }
 
         function findKing(color, customBoard = board) {
-            for (let r = 0; r < 8; r++) {
-                for (let c = 0; c < 8; c++) {
-                    if (customBoard[r][c] === color + 'K') return { r, c };
-                }
-            }
+            for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++)
+                if (customBoard[r][c] === color + 'K') return { r, c };
             return null;
         }
 
@@ -1137,13 +1045,11 @@
             const kingPos = findKing(color, customBoard);
             if (!kingPos) return false;
             const enemyColor = color === 'w' ? 'b' : 'w';
-            for (let r = 0; r < 8; r++) {
-                for (let c = 0; c < 8; c++) {
-                    const piece = customBoard[r][c];
-                    if (piece && piece[0] === enemyColor) {
-                        const moves = getRawMoves(r, c, customBoard);
-                        if (moves.some(m => m.r === kingPos.r && m.c === kingPos.c)) return true;
-                    }
+            for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) {
+                const piece = customBoard[r][c];
+                if (piece && piece[0] === enemyColor) {
+                    const moves = getRawMoves(r, c, customBoard);
+                    if (moves.some(m => m.r === kingPos.r && m.c === kingPos.c)) return true;
                 }
             }
             return false;
@@ -1153,161 +1059,110 @@
             const piece = customBoard[r][c];
             if (!piece) return [];
             const color = piece[0];
-            const rawMoves = getRawMoves(r, c, customBoard);
-            return rawMoves.filter(m => {
-                const originalDest = customBoard[m.r][m.c];
+            return getRawMoves(r, c, customBoard).filter(m => {
+                const orig = customBoard[m.r][m.c];
                 customBoard[m.r][m.c] = piece;
                 customBoard[r][c] = null;
                 const inCheck = isKingInCheck(color, customBoard);
                 customBoard[r][c] = piece;
-                customBoard[m.r][m.c] = originalDest;
+                customBoard[m.r][m.c] = orig;
                 return !inCheck;
             });
         }
 
         function getAllLegalMoves(color, customBoard = board) {
             const moves = [];
-            for (let r = 0; r < 8; r++) {
-                for (let c = 0; c < 8; c++) {
-                    if (customBoard[r][c] && customBoard[r][c][0] === color) {
-                        const pieceMoves = getLegalMoves(r, c, customBoard);
-                        for (let m of pieceMoves) {
-                            moves.push({ from: { r, c }, to: m });
-                        }
-                    }
+            for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) {
+                if (customBoard[r][c] && customBoard[r][c][0] === color) {
+                    for (let m of getLegalMoves(r, c, customBoard)) moves.push({ from: { r, c }, to: m });
                 }
             }
             return moves;
         }
 
-        // Lấy tọa độ màn hình của ô cờ
         function getSquareScreenPosition(r, c) {
             const boardEl = document.getElementById('chessboard');
             if (!boardEl) return null;
-
             const i = boardFlipped ? 7 - r : r;
             const j = boardFlipped ? 7 - c : c;
-            const squares = boardEl.children;
-            const idx = i * 8 + j;
-            const square = squares[idx];
+            const square = boardEl.children[i * 8 + j];
             if (!square) return null;
-
             const rect = square.getBoundingClientRect();
-            return {
-                x: rect.left + rect.width / 2,
-                y: rect.top + rect.height / 2,
-                width: rect.width,
-                height: rect.height
-            };
+            return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2, width: rect.width, height: rect.height };
         }
 
-        // Thực hiện nước đi (có animation + hiệu ứng chiến đấu khi bắt quân)
         function executeMove(fromR, fromC, toR, toC, isFromSync = false) {
             if (isAnimating) return;
             const movingPiece = board[fromR][fromC];
             const capturedPiece = board[toR][toC];
             if (!movingPiece) return;
-
             isAnimating = true;
             const color = movingPiece[0];
-
             board[toR][toC] = movingPiece;
             board[fromR][fromC] = null;
-
             let promoted = false;
             if (movingPiece[1] === 'P' && (toR === 0 || toR === 7)) {
                 board[toR][toC] = color + 'Q';
                 promoted = true;
             }
-
             if (capturedPiece) {
                 if (color === 'w') capturedWhite.push(capturedPiece);
                 else capturedBlack.push(capturedPiece);
             }
-
             const nextColor = (color === 'w') ? 'b' : 'w';
             const opponentInCheck = isKingInCheck(nextColor);
-
             const cols = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
             const notation = `${movingPiece[1] !== 'P' ? movingPiece[1] : ''}${cols[fromC]}${8 - fromR}${capturedPiece ? 'x' : '-'}${cols[toC]}${8 - toR}${promoted ? '=Q' : ''}`;
-
             moveHistory.push({
-                from: { r: fromR, c: fromC },
-                to: { r: toR, c: toC },
-                piece: movingPiece,
-                captured: capturedPiece,
-                notation: notation + (opponentInCheck ? '+' : ''),
-                color: color
+                from: { r: fromR, c: fromC }, to: { r: toR, c: toC },
+                piece: movingPiece, captured: capturedPiece,
+                notation: notation + (opponentInCheck ? '+' : ''), color: color
             });
-
             playMoveAudio(!!capturedPiece, opponentInCheck);
-
             turn = nextColor;
             checkEndGameStatus();
-
-            // Render animation di chuyển
             renderAnimatedMove(fromR, fromC, toR, toC, movingPiece, capturedPiece, () => {
                 isAnimating = false;
+                hideAIThinking();
                 if (!isFromSync && gameMode === 'online' && currentRoomId && roomFirebaseRef) {
                     roomFirebaseRef.update({
                         lastMove: { fromR, fromC, toR, toC, color, promoted, timestamp: Date.now() },
-                        turn: turn,
-                        whiteTimeMs: whiteTimeMs,
-                        blackTimeMs: blackTimeMs
+                        turn: turn, whiteTimeMs: whiteTimeMs, blackTimeMs: blackTimeMs
                     });
                 }
                 if (!isGameOver) startClock();
                 if (!isGameOver && gameMode === 'ai' && turn === 'b') {
-                    setTimeout(makeAIMove, 280);
+                    showAIThinking();
+                    setTimeout(makeAIMove, 100);
                 }
             });
         }
 
         function renderAnimatedMove(fromR, fromC, toR, toC, movingPiece, capturedPiece, callback) {
-            // Render board cơ bản
             render();
-
             const boardEl = document.getElementById('chessboard');
             const squares = boardEl.children;
-
             const getSquareIndex = (r, c) => {
                 const i = boardFlipped ? 7 - r : r;
                 const j = boardFlipped ? 7 - c : c;
                 return i * 8 + j;
             };
-
-            const fromIdx = getSquareIndex(fromR, fromC);
-            const toIdx = getSquareIndex(toR, toC);
-
-            const fromSquare = squares[fromIdx];
-            const toSquare = squares[toIdx];
-
-            if (!fromSquare || !toSquare) {
-                callback();
-                return;
-            }
-
-            // Xóa quân cờ ở ô đích
+            const fromSquare = squares[getSquareIndex(fromR, fromC)];
+            const toSquare = squares[getSquareIndex(toR, toC)];
+            if (!fromSquare || !toSquare) { callback(); return; }
             const existingPieceInTarget = toSquare.querySelector('.piece-container');
-            if (existingPieceInTarget) {
-                existingPieceInTarget.remove();
-            }
+            if (existingPieceInTarget) existingPieceInTarget.remove();
 
-            // Tạo element quân cờ di chuyển
             const movingPieceEl = document.createElement('div');
             movingPieceEl.className = 'piece-container absolute';
-            movingPieceEl.style.width = '90%';
-            movingPieceEl.style.height = '90%';
-            movingPieceEl.style.left = '5%';
-            movingPieceEl.style.top = '5%';
-            movingPieceEl.style.zIndex = '50';
-            movingPieceEl.style.pointerEvents = 'none';
+            movingPieceEl.style.width = '90%'; movingPieceEl.style.height = '90%';
+            movingPieceEl.style.left = '5%'; movingPieceEl.style.top = '5%';
+            movingPieceEl.style.zIndex = '50'; movingPieceEl.style.pointerEvents = 'none';
             movingPieceEl.innerHTML = SVG_PIECES[movingPiece];
 
             const fromRect = fromSquare.getBoundingClientRect();
             const toRect = toSquare.getBoundingClientRect();
             const boardRect = boardEl.getBoundingClientRect();
-
             const fromX = fromRect.left - boardRect.left;
             const fromY = fromRect.top - boardRect.top;
             const toX = toRect.left - boardRect.left;
@@ -1318,53 +1173,35 @@
             movingPieceEl.style.width = fromRect.width + 'px';
             movingPieceEl.style.height = fromRect.height + 'px';
             movingPieceEl.style.transition = 'left 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), top 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-
             boardEl.style.position = 'relative';
             boardEl.appendChild(movingPieceEl);
 
-            // ===== HIỆU ỨNG BẮT QUÂN ĐẶC BIỆT =====
             if (capturedPiece) {
-                // Lấy tọa độ màn hình của ô đích để tạo hiệu ứng nổ
                 const targetScreenPos = getSquareScreenPosition(toR, toC);
-                if (targetScreenPos) {
-                    // Tạo hiệu ứng nổ, tia lửa, khói
-                    spawnCaptureEffect(targetScreenPos.x, targetScreenPos.y);
-                }
+                if (targetScreenPos) spawnCaptureEffect(targetScreenPos.x, targetScreenPos.y);
 
-                // Hiệu ứng flash trắng trên bàn cờ (DOM)
                 const flashEl = document.createElement('div');
                 flashEl.className = 'capture-flash-effect';
-                flashEl.style.left = toX + 'px';
-                flashEl.style.top = toY + 'px';
-                flashEl.style.width = toRect.width + 'px';
-                flashEl.style.height = toRect.height + 'px';
+                flashEl.style.left = toX + 'px'; flashEl.style.top = toY + 'px';
+                flashEl.style.width = toRect.width + 'px'; flashEl.style.height = toRect.height + 'px';
                 boardEl.appendChild(flashEl);
                 setTimeout(() => flashEl.remove(), 500);
 
-                // Quân bị ăn biến mất với hiệu ứng pop
                 const capturedEl = document.createElement('div');
                 capturedEl.className = 'piece-container absolute piece-animate-capture';
-                capturedEl.style.width = toRect.width + 'px';
-                capturedEl.style.height = toRect.height + 'px';
-                capturedEl.style.left = toX + 'px';
-                capturedEl.style.top = toY + 'px';
-                capturedEl.style.zIndex = '45';
-                capturedEl.style.pointerEvents = 'none';
+                capturedEl.style.width = toRect.width + 'px'; capturedEl.style.height = toRect.height + 'px';
+                capturedEl.style.left = toX + 'px'; capturedEl.style.top = toY + 'px';
+                capturedEl.style.zIndex = '45'; capturedEl.style.pointerEvents = 'none';
                 capturedEl.innerHTML = SVG_PIECES[capturedPiece];
                 boardEl.appendChild(capturedEl);
 
-                // Rung nhẹ bàn cờ khi bắt quân
                 boardEl.animate([
-                    { transform: 'translateX(0)' },
-                    { transform: 'translateX(-3px)' },
-                    { transform: 'translateX(3px)' },
-                    { transform: 'translateX(-2px)' },
-                    { transform: 'translateX(2px)' },
-                    { transform: 'translateX(0)' }
+                    { transform: 'translateX(0)' }, { transform: 'translateX(-3px)' },
+                    { transform: 'translateX(3px)' }, { transform: 'translateX(-2px)' },
+                    { transform: 'translateX(2px)' }, { transform: 'translateX(0)' }
                 ], { duration: 180, easing: 'ease-out' });
             }
 
-            // Bắt đầu di chuyển quân cờ
             requestAnimationFrame(() => {
                 requestAnimationFrame(() => {
                     movingPieceEl.style.left = toX + 'px';
@@ -1374,8 +1211,7 @@
 
             setTimeout(() => {
                 movingPieceEl.remove();
-                const captureEffects = boardEl.querySelectorAll('.piece-animate-capture');
-                captureEffects.forEach(el => el.remove());
+                boardEl.querySelectorAll('.piece-animate-capture').forEach(el => el.remove());
                 render();
                 callback();
             }, 350);
@@ -1385,22 +1221,11 @@
             const legalMoves = getAllLegalMoves(turn);
             const inCheck = isKingInCheck(turn);
             if (legalMoves.length === 0) {
-                isGameOver = true;
-                stopClock();
+                isGameOver = true; stopClock();
+                hideAIThinking();
                 const winner = turn === 'w' ? 'Bên Đen' : 'Bên Trắng';
-                if (inCheck) {
-                    showVictoryCelebration(
-                        `${winner} Thắng Rồi cu!`,
-                        `Chiếu bí đối thủ tuyệt đối! Vua ${turn === 'w' ? 'Trắng' : 'Đen'} không còn lối thoát.`,
-                        true
-                    );
-                } else {
-                    showVictoryCelebration(
-                        'Hòa Cờ (Stalemate)!',
-                        'Không còn bất kỳ nước đi hợp lệ nào và Vua không bị chiếu.',
-                        false
-                    );
-                }
+                if (inCheck) showVictoryCelebration(`${winner} Thắng Rồi cu!`, `Chiếu bí đối thủ tuyệt đối!`, true);
+                else showVictoryCelebration('Hòa Cờ (Stalemate)!', 'Không còn bất kỳ nước đi hợp lệ nào.', false);
             }
         }
 
@@ -1408,50 +1233,387 @@
             document.getElementById('victoryTitle').innerText = title;
             document.getElementById('victoryDesc').innerText = desc;
             document.getElementById('victoryModal').classList.remove('hidden');
-            if (isWin) {
-                playVictorySound();
-                startFireworks();
+            if (isWin) { playVictorySound(); startFireworks(); }
+        }
+
+        /* ==========================================================
+           AI ENGINE - OPTION C (max ~2200 ELO)
+           ========================================================== */
+        const AI_DIFFICULTY = {
+            easy: {
+                depth: 1, timeLimit: 300,
+                useQuiescence: false, useTransposition: false,
+                randomness: 0.4, name: 'Dễ (~800 ELO)'
+            },
+            medium: {
+                depth: 2, timeLimit: 800,
+                useQuiescence: false, useTransposition: false,
+                randomness: 0.15, name: 'Vừa (~1300 ELO)'
+            },
+            hard: {
+                depth: 3, timeLimit: 1800,
+                useQuiescence: true, useTransposition: false,
+                randomness: 0.05, name: 'Khó (~1700 ELO)'
+            },
+            expert: {
+                depth: 4, timeLimit: 3000,
+                useQuiescence: true, useTransposition: true,
+                randomness: 0, name: 'Siêu khó (~2200 ELO)'
             }
+        };
+
+        let currentDifficulty = 'expert';
+
+        const PST = {
+            P: [
+                [0, 0, 0, 0, 0, 0, 0, 0],
+                [50, 50, 50, 50, 50, 50, 50, 50],
+                [10, 10, 20, 30, 30, 20, 10, 10],
+                [5, 5, 10, 25, 25, 10, 5, 5],
+                [0, 0, 0, 20, 20, 0, 0, 0],
+                [5, -5, -10, 0, 0, -10, -5, 5],
+                [5, 10, 10, -20, -20, 10, 10, 5],
+                [0, 0, 0, 0, 0, 0, 0, 0]
+            ],
+            N: [
+                [-50, -40, -30, -30, -30, -30, -40, -50],
+                [-40, -20, 0, 0, 0, 0, -20, -40],
+                [-30, 0, 10, 15, 15, 10, 0, -30],
+                [-30, 5, 15, 20, 20, 15, 5, -30],
+                [-30, 0, 15, 20, 20, 15, 0, -30],
+                [-30, 5, 10, 15, 15, 10, 5, -30],
+                [-40, -20, 0, 5, 5, 0, -20, -40],
+                [-50, -40, -30, -30, -30, -30, -40, -50]
+            ],
+            B: [
+                [-20, -10, -10, -10, -10, -10, -10, -20],
+                [-10, 0, 0, 0, 0, 0, 0, -10],
+                [-10, 0, 5, 10, 10, 5, 0, -10],
+                [-10, 5, 5, 10, 10, 5, 5, -10],
+                [-10, 0, 10, 10, 10, 10, 0, -10],
+                [-10, 10, 10, 10, 10, 10, 10, -10],
+                [-10, 5, 0, 0, 0, 0, 5, -10],
+                [-20, -10, -10, -10, -10, -10, -10, -20]
+            ],
+            R: [
+                [0, 0, 0, 0, 0, 0, 0, 0],
+                [5, 10, 10, 10, 10, 10, 10, 5],
+                [-5, 0, 0, 0, 0, 0, 0, -5],
+                [-5, 0, 0, 0, 0, 0, 0, -5],
+                [-5, 0, 0, 0, 0, 0, 0, -5],
+                [-5, 0, 0, 0, 0, 0, 0, -5],
+                [-5, 0, 0, 0, 0, 0, 0, -5],
+                [0, 0, 0, 5, 5, 0, 0, 0]
+            ],
+            Q: [
+                [-20, -10, -10, -5, -5, -10, -10, -20],
+                [-10, 0, 0, 0, 0, 0, 0, -10],
+                [-10, 0, 5, 5, 5, 5, 0, -10],
+                [-5, 0, 5, 5, 5, 5, 0, -5],
+                [0, 0, 5, 5, 5, 5, 0, -5],
+                [-10, 5, 5, 5, 5, 5, 0, -10],
+                [-10, 0, 5, 0, 0, 0, 0, -10],
+                [-20, -10, -10, -5, -5, -10, -10, -20]
+            ],
+            K_mid: [
+                [-30, -40, -40, -50, -50, -40, -40, -30],
+                [-30, -40, -40, -50, -50, -40, -40, -30],
+                [-30, -40, -40, -50, -50, -40, -40, -30],
+                [-30, -40, -40, -50, -50, -40, -40, -30],
+                [-20, -30, -30, -40, -40, -30, -30, -20],
+                [-10, -20, -20, -20, -20, -20, -20, -10],
+                [20, 20, 0, 0, 0, 0, 20, 20],
+                [20, 30, 10, 0, 0, 10, 30, 20]
+            ],
+            K_end: [
+                [-50, -40, -30, -20, -20, -30, -40, -50],
+                [-30, -20, -10, 0, 0, -10, -20, -30],
+                [-30, -10, 20, 30, 30, 20, -10, -30],
+                [-30, -10, 30, 40, 40, 30, -10, -30],
+                [-30, -10, 30, 40, 40, 30, -10, -30],
+                [-30, -10, 20, 30, 30, 20, -10, -30],
+                [-30, -30, 0, 0, 0, 0, -30, -30],
+                [-50, -30, -30, -30, -30, -30, -30, -50]
+            ]
+        };
+
+        const AI_PIECE_VALUES = { 'P': 100, 'N': 320, 'B': 330, 'R': 500, 'Q': 900, 'K': 20000 };
+
+        function countMaterial(customBoard) {
+            let total = 0;
+            for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) {
+                const p = customBoard[r][c];
+                if (p && p[1] !== 'K' && p[1] !== 'P') total += AI_PIECE_VALUES[p[1]];
+            }
+            return total;
         }
 
         function evaluateBoard(customBoard) {
             let score = 0;
+            const isEndgame = countMaterial(customBoard) < 1500;
             for (let r = 0; r < 8; r++) {
                 for (let c = 0; c < 8; c++) {
                     const p = customBoard[r][c];
-                    if (p) {
-                        const val = PIECE_VALUES[p[1]] || 0;
-                        const centerBonus = (3.5 - Math.abs(3.5 - r)) + (3.5 - Math.abs(3.5 - c));
-                        const total = val + centerBonus * 4;
-                        score += (p[0] === 'b') ? total : -total;
+                    if (!p) continue;
+                    const type = p[1], color = p[0];
+                    const val = AI_PIECE_VALUES[type];
+                    let pstValue = 0;
+                    if (type === 'K') {
+                        if (color === 'w') pstValue = isEndgame ? PST.K_end[r][c] : PST.K_mid[r][c];
+                        else { const fr = 7 - r; pstValue = isEndgame ? PST.K_end[fr][c] : PST.K_mid[fr][c]; }
+                    } else {
+                        if (color === 'w') pstValue = PST[type][r][c];
+                        else pstValue = PST[type][7 - r][c];
                     }
+                    if (color === 'b') score += val + pstValue;
+                    else score -= val + pstValue;
                 }
             }
             return score;
         }
 
+        function scoreMove(move, customBoard) {
+            const capturedPiece = customBoard[move.to.r][move.to.c];
+            const movingPiece = customBoard[move.from.r][move.from.c];
+            let score = 0;
+            if (capturedPiece) score += 10 * AI_PIECE_VALUES[capturedPiece[1]] - AI_PIECE_VALUES[movingPiece[1]];
+            if (movingPiece[1] === 'P' && (move.to.r === 0 || move.to.r === 7)) score += 800;
+            return score;
+        }
+
+        function orderMoves(moves, customBoard) {
+            return moves.map(m => ({ move: m, score: scoreMove(m, customBoard) }))
+                .sort((a, b) => b.score - a.score).map(x => x.move);
+        }
+
+        const transpositionTable = new Map();
+        const TT_MAX_SIZE = 200000;
+
+        function getBoardHash(customBoard, turn) {
+            let hash = turn;
+            for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) hash += (customBoard[r][c] || '.') + ',';
+            return hash;
+        }
+
+        function quiescenceSearch(customBoard, alpha, beta, isMaximizing, depth) {
+            const standPat = evaluateBoard(customBoard);
+            if (isMaximizing) {
+                if (standPat >= beta) return beta;
+                if (standPat > alpha) alpha = standPat;
+            } else {
+                if (standPat <= alpha) return alpha;
+                if (standPat < beta) beta = standPat;
+            }
+            if (depth > 4) return isMaximizing ? alpha : beta;
+
+            const color = isMaximizing ? 'b' : 'w';
+            const moves = getAllLegalMoves(color, customBoard);
+            const captureMoves = moves.filter(m => customBoard[m.to.r][m.to.c]);
+            const ordered = orderMoves(captureMoves, customBoard);
+
+            if (isMaximizing) {
+                for (const m of ordered) {
+                    const orig = customBoard[m.to.r][m.to.c];
+                    const piece = customBoard[m.from.r][m.from.c];
+                    customBoard[m.to.r][m.to.c] = piece;
+                    customBoard[m.from.r][m.from.c] = null;
+                    const score = quiescenceSearch(customBoard, alpha, beta, false, depth + 1);
+                    customBoard[m.from.r][m.from.c] = piece;
+                    customBoard[m.to.r][m.to.c] = orig;
+                    if (score >= beta) return beta;
+                    if (score > alpha) alpha = score;
+                }
+                return alpha;
+            } else {
+                for (const m of ordered) {
+                    const orig = customBoard[m.to.r][m.to.c];
+                    const piece = customBoard[m.from.r][m.from.c];
+                    customBoard[m.to.r][m.to.c] = piece;
+                    customBoard[m.from.r][m.from.c] = null;
+                    const score = quiescenceSearch(customBoard, alpha, beta, true, depth + 1);
+                    customBoard[m.from.r][m.from.c] = piece;
+                    customBoard[m.to.r][m.to.c] = orig;
+                    if (score <= alpha) return alpha;
+                    if (score < beta) beta = score;
+                }
+                return beta;
+            }
+        }
+
+        function minimax(customBoard, depth, alpha, beta, isMaximizing, startTime, timeLimit, config) {
+            if (performance.now() - startTime > timeLimit) return isMaximizing ? -99999 : 99999;
+
+            let hash = null;
+            if (config.useTransposition) {
+                hash = getBoardHash(customBoard, isMaximizing ? 'b' : 'w') + '_d' + depth;
+                if (transpositionTable.has(hash)) return transpositionTable.get(hash);
+            }
+
+            if (depth === 0) {
+                const result = config.useQuiescence
+                    ? quiescenceSearch(customBoard, alpha, beta, isMaximizing, 0)
+                    : evaluateBoard(customBoard);
+                if (config.useTransposition && hash) {
+                    if (transpositionTable.size > TT_MAX_SIZE) transpositionTable.clear();
+                    transpositionTable.set(hash, result);
+                }
+                return result;
+            }
+
+            const color = isMaximizing ? 'b' : 'w';
+            const moves = getAllLegalMoves(color, customBoard);
+
+            if (moves.length === 0) {
+                if (isKingInCheck(color, customBoard)) {
+                    return isMaximizing ? -100000 + (10 - depth) : 100000 - (10 - depth);
+                }
+                return 0;
+            }
+
+            const ordered = orderMoves(moves, customBoard);
+            let result;
+
+            if (isMaximizing) {
+                let maxEval = -Infinity;
+                for (const m of ordered) {
+                    const orig = customBoard[m.to.r][m.to.c];
+                    const piece = customBoard[m.from.r][m.from.c];
+                    customBoard[m.to.r][m.to.c] = piece;
+                    customBoard[m.from.r][m.from.c] = null;
+                    const evalScore = minimax(customBoard, depth - 1, alpha, beta, false, startTime, timeLimit, config);
+                    customBoard[m.from.r][m.from.c] = piece;
+                    customBoard[m.to.r][m.to.c] = orig;
+                    maxEval = Math.max(maxEval, evalScore);
+                    alpha = Math.max(alpha, evalScore);
+                    if (beta <= alpha) break;
+                }
+                result = maxEval;
+            } else {
+                let minEval = Infinity;
+                for (const m of ordered) {
+                    const orig = customBoard[m.to.r][m.to.c];
+                    const piece = customBoard[m.from.r][m.from.c];
+                    customBoard[m.to.r][m.to.c] = piece;
+                    customBoard[m.from.r][m.from.c] = null;
+                    const evalScore = minimax(customBoard, depth - 1, alpha, beta, true, startTime, timeLimit, config);
+                    customBoard[m.from.r][m.from.c] = piece;
+                    customBoard[m.to.r][m.to.c] = orig;
+                    minEval = Math.min(minEval, evalScore);
+                    beta = Math.min(beta, evalScore);
+                    if (beta <= alpha) break;
+                }
+                result = minEval;
+            }
+
+            if (config.useTransposition && hash) {
+                if (transpositionTable.size > TT_MAX_SIZE) transpositionTable.clear();
+                transpositionTable.set(hash, result);
+            }
+            return result;
+        }
+
+        function showAIThinking() {
+            document.getElementById('aiThinking').classList.remove('hidden');
+        }
+        function hideAIThinking() {
+            document.getElementById('aiThinking').classList.add('hidden');
+        }
+
         function makeAIMove() {
             if (isGameOver || isAnimating) return;
+
             const blackMoves = getAllLegalMoves('b');
-            if (blackMoves.length === 0) return;
-            let bestScore = -Infinity;
-            let bestMove = blackMoves[0];
-            for (let m of blackMoves) {
+            if (blackMoves.length === 0) { hideAIThinking(); return; }
+
+            const config = AI_DIFFICULTY[currentDifficulty];
+            const startTime = performance.now();
+
+            if (config.useTransposition) transpositionTable.clear();
+
+            const moveScores = [];
+            const ordered = orderMoves(blackMoves, board);
+            let alpha = -Infinity;
+            const beta = Infinity;
+
+            for (const m of ordered) {
+                if (performance.now() - startTime > config.timeLimit) break;
                 const orig = board[m.to.r][m.to.c];
                 const piece = board[m.from.r][m.from.c];
                 board[m.to.r][m.to.c] = piece;
                 board[m.from.r][m.from.c] = null;
-                let score = evaluateBoard(board);
-                if (orig) score += (PIECE_VALUES[orig[1]] || 0) * 1.5;
+                const score = minimax(board, config.depth - 1, alpha, beta, false, startTime, config.timeLimit, config);
                 board[m.from.r][m.from.c] = piece;
                 board[m.to.r][m.to.c] = orig;
-                if (score > bestScore) { bestScore = score; bestMove = m; }
+                moveScores.push({ move: m, score });
+                alpha = Math.max(alpha, score);
             }
-            executeMove(bestMove.from.r, bestMove.from.c, bestMove.to.r, bestMove.to.c);
+
+            if (moveScores.length === 0) {
+                hideAIThinking();
+                executeMove(blackMoves[0].from.r, blackMoves[0].from.c, blackMoves[0].to.r, blackMoves[0].to.c);
+                return;
+            }
+
+            moveScores.sort((a, b) => b.score - a.score);
+            let chosen;
+            if (config.randomness > 0 && moveScores.length > 1) {
+                const topN = Math.max(1, Math.ceil(moveScores.length * config.randomness));
+                chosen = moveScores[Math.floor(Math.random() * topN)].move;
+            } else {
+                chosen = moveScores[0].move;
+            }
+
+            const elapsed = Math.round(performance.now() - startTime);
+            console.log(`🤖 AI [${config.name}]: depth ${config.depth}, ${elapsed}ms, score ${moveScores[0].score}, move ${chosen.from.r}${chosen.from.c}→${chosen.to.r}${chosen.to.c}`);
+
+            executeMove(chosen.from.r, chosen.from.c, chosen.to.r, chosen.to.c);
+        }
+
+        function setAIDifficulty(level) {
+            currentDifficulty = level;
+
+            const btnMap = {
+                easy: document.getElementById('diffEasyBtn'),
+                medium: document.getElementById('diffMediumBtn'),
+                hard: document.getElementById('diffHardBtn'),
+                expert: document.getElementById('diffExpertBtn')
+            };
+
+            const activeClasses = {
+                easy: 'px-1.5 py-2 rounded-xl text-[11px] font-bold border border-emerald-500/80 bg-emerald-500/20 text-emerald-300 flex flex-col items-center justify-center gap-1 transition shadow-sm',
+                medium: 'px-1.5 py-2 rounded-xl text-[11px] font-bold border border-amber-500/80 bg-amber-500/20 text-amber-300 flex flex-col items-center justify-center gap-1 transition shadow-sm',
+                hard: 'px-1.5 py-2 rounded-xl text-[11px] font-bold border border-orange-500/80 bg-orange-500/20 text-orange-300 flex flex-col items-center justify-center gap-1 transition shadow-sm',
+                expert: 'px-1.5 py-2 rounded-xl text-[11px] font-bold border border-amber-500/80 bg-amber-500/20 text-amber-300 flex flex-col items-center justify-center gap-1 transition shadow-sm'
+            };
+
+            const inactiveClasses = {
+                easy: 'px-1.5 py-2 rounded-xl text-[11px] font-bold border border-slate-700 bg-slate-800/60 text-slate-400 hover:bg-slate-800 hover:text-emerald-300 flex flex-col items-center justify-center gap-1 transition',
+                medium: 'px-1.5 py-2 rounded-xl text-[11px] font-bold border border-slate-700 bg-slate-800/60 text-slate-400 hover:bg-slate-800 hover:text-amber-300 flex flex-col items-center justify-center gap-1 transition',
+                hard: 'px-1.5 py-2 rounded-xl text-[11px] font-bold border border-slate-700 bg-slate-800/60 text-slate-400 hover:bg-slate-800 hover:text-orange-300 flex flex-col items-center justify-center gap-1 transition',
+                expert: 'px-1.5 py-2 rounded-xl text-[11px] font-bold border border-slate-700 bg-slate-800/60 text-slate-400 hover:bg-slate-800 hover:text-rose-300 flex flex-col items-center justify-center gap-1 transition'
+            };
+
+            Object.keys(btnMap).forEach(k => {
+                btnMap[k].className = (k === level) ? activeClasses[k] : inactiveClasses[k];
+            });
+
+            const labels = {
+                easy: 'DỄ (~800)',
+                medium: 'VỪA (~1300)',
+                hard: 'KHÓ (~1700)',
+                expert: 'SIÊU KHÓ (~2200)'
+            };
+            document.getElementById('activeDifficultyText').innerText = labels[level];
+
+            const eloMap = { easy: '800 ELO', medium: '1300 ELO', hard: '1700 ELO', expert: '2200 ELO' };
+            const subEl = document.getElementById('topPlayerSub');
+            if (subEl && gameMode === 'ai') subEl.innerText = eloMap[level];
+
+            showToast(`Đã đổi độ khó Bot: ${labels[level]}`);
         }
 
         /* ==========================================================
-           6. ONLINE MULTIPLAYER
+           ONLINE MULTIPLAYER
            ========================================================== */
         function showToast(msg) {
             const toast = document.getElementById('toastNotification');
@@ -1468,7 +1630,7 @@
             boardFlipped = false;
             roomFirebaseRef = database.ref('chess_rooms/' + roomId);
             roomFirebaseRef.set({
-                roomId: roomId, status: 'waiting', whitePlayer: 'Host', blackPlayer: null,
+                roomId, status: 'waiting', whitePlayer: 'Host', blackPlayer: null,
                 lastMove: null, turn: 'w',
                 whiteTimeMs: INITIAL_TIME_MS, blackTimeMs: INITIAL_TIME_MS,
                 created: Date.now()
@@ -1527,7 +1689,7 @@
                     if (!isGameOver) {
                         isGameOver = true; stopClock();
                         const winner = data.resignedBy === 'w' ? 'Bên Đen' : 'Bên Trắng';
-                        showVictoryCelebration(`${winner} Thắng Cuộc!`, `Đối thủ đã xin đầu hàng trận đấu!`, true);
+                        showVictoryCelebration(`${winner} Thắng Cuộc!`, `Đối thủ đã xin đầu hàng!`, true);
                     }
                     return;
                 }
@@ -1538,9 +1700,8 @@
                         blackTimeMs = data.blackTimeMs ?? blackTimeMs;
                         updateClockDisplay();
                         const winner = data.timeUpBy === 'w' ? 'Bên Đen' : 'Bên Trắng';
-                        const loserName = data.timeUpBy === 'w' ? 'Trắng' : 'Đen';
                         playTimeUpSound();
-                        showVictoryCelebration(`${winner} Thắng Do Hết Thời Gian!`, `Bên ${loserName} đã sử dụng hết 10 phút. Trận đấu kết thúc!`, true);
+                        showVictoryCelebration(`${winner} Thắng Do Hết Thời Gian!`, `Đối thủ đã hết thời gian.`, true);
                     }
                     return;
                 }
@@ -1550,15 +1711,18 @@
                     const isNewMove = !lastHistory ||
                         lastHistory.from.r !== lm.fromR || lastHistory.from.c !== lm.fromC ||
                         lastHistory.to.r !== lm.toR || lastHistory.to.c !== lm.toC;
-                    if (isNewMove && !isAnimating) {
-                        executeMove(lm.fromR, lm.fromC, lm.toR, lm.toC, true);
-                    }
+                    if (isNewMove && !isAnimating) executeMove(lm.fromR, lm.fromC, lm.toR, lm.toC, true);
                 }
             });
         }
 
         function leaveOnlineRoom() {
-            if (roomFirebaseRef) { roomFirebaseRef.off(); roomFirebaseRef = null; }
+            if (callState !== 'idle') endCall(true);
+            if (roomFirebaseRef) {
+                if (currentRoomId) database.ref('chess_calls/' + currentRoomId).remove().catch(() => {});
+                roomFirebaseRef.off();
+                roomFirebaseRef = null;
+            }
             currentRoomId = null;
             myOnlineRole = null;
             stopClock();
@@ -1578,7 +1742,323 @@
         }
 
         /* ==========================================================
-           7. RENDER
+           VOICE CALL (WebRTC AUDIO-ONLY)
+           ========================================================== */
+        const RTC_CONFIG = {
+            iceServers: [
+                { urls: 'stun:stun.l.google.com:19302' },
+                { urls: 'stun:stun1.l.google.com:19302' },
+                { urls: 'stun:stun2.l.google.com:19302' },
+                { urls: 'stun:stun3.l.google.com:19302' },
+                { urls: 'stun:stun4.l.google.com:19302' }
+            ]
+        };
+
+        let pc = null;
+        let localStream = null;
+        let callState = 'idle';
+        let callRef = null;
+        let callListener = null;
+        let callTimerInterval = null;
+        let callStartTime = null;
+        let micMuted = false;
+        let remoteDescSet = false;
+        let iceCandidateBuffer = [];
+
+        const remoteAudioEl = document.getElementById('remoteAudio');
+        const incomingCallModal = document.getElementById('incomingCallModal');
+        const callBar = document.getElementById('callBar');
+        const callTimerEl = document.getElementById('callTimer');
+        const callPeerStatusEl = document.getElementById('callPeerStatus');
+        const muteMicBtn = document.getElementById('muteMicBtn');
+        const muteMicIcon = document.getElementById('muteMicIcon');
+        const callBtn = document.getElementById('callBtn');
+        const acceptCallBtn = document.getElementById('acceptCallBtn');
+        const rejectCallBtn = document.getElementById('rejectCallBtn');
+        const endCallBtn = document.getElementById('endCallBtn');
+
+        function updateCallUI() {
+            const inCall = callState === 'active' || callState === 'calling';
+            const inRinging = callState === 'ringing';
+            if (inCall) callBar.classList.remove('hidden');
+            else callBar.classList.add('hidden');
+            if (inRinging) incomingCallModal.classList.remove('hidden');
+            else incomingCallModal.classList.add('hidden');
+            if (callState === 'calling') {
+                callPeerStatusEl.innerText = 'Đang đổ chuông...';
+                callTimerEl.innerText = '00:00';
+            } else if (callState === 'active') {
+                callPeerStatusEl.innerText = micMuted ? 'Mic đang tắt' : 'Đang kết nối';
+            }
+        }
+
+        function startCallTimer() {
+            stopCallTimer();
+            callStartTime = Date.now();
+            callTimerEl.innerText = '00:00';
+            callTimerInterval = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - callStartTime) / 1000);
+                const m = Math.floor(elapsed / 60);
+                const s = elapsed % 60;
+                callTimerEl.innerText = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+            }, 1000);
+        }
+
+        function stopCallTimer() {
+            if (callTimerInterval) { clearInterval(callTimerInterval); callTimerInterval = null; }
+        }
+
+        function resetCallState() {
+            stopCallTimer();
+            stopRingtone();
+            if (pc) { try { pc.close(); } catch (e) {} pc = null; }
+            if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; }
+            remoteAudioEl.srcObject = null;
+            remoteDescSet = false;
+            iceCandidateBuffer = [];
+            micMuted = false;
+            muteMicBtn.classList.remove('mic-btn-muted');
+            muteMicIcon.className = 'fa-solid fa-microphone text-base';
+            callTimerEl.innerText = '00:00';
+            callState = 'idle';
+            updateCallUI();
+        }
+
+        async function getUserMediaSafe() {
+            try {
+                return await navigator.mediaDevices.getUserMedia({
+                    audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+                    video: false
+                });
+            } catch (e) {
+                console.error('getUserMedia error:', e);
+                showToast('Không thể truy cập mic. Vui lòng cấp quyền!');
+                return null;
+            }
+        }
+
+        function createPeerConnection(roomId) {
+            const peer = new RTCPeerConnection(RTC_CONFIG);
+            peer.onicecandidate = (event) => {
+                if (event.candidate && callRef) {
+                    callRef.child('candidates').push({
+                        from: myOnlineRole,
+                        candidate: event.candidate.toJSON(),
+                        ts: Date.now()
+                    });
+                }
+            };
+            peer.ontrack = (event) => {
+                if (event.streams && event.streams[0]) {
+                    remoteAudioEl.srcObject = event.streams[0];
+                    remoteAudioEl.play().catch(err => {
+                        console.warn('Autoplay blocked:', err);
+                        showToast('Nhấn vào màn hình để nghe tiếng đối thủ!');
+                    });
+                }
+            };
+            peer.onconnectionstatechange = () => {
+                console.log('PC state:', peer.connectionState);
+                if (peer.connectionState === 'connected') {
+                    if (callState === 'calling') {
+                        callState = 'active';
+                        startCallTimer();
+                        updateCallUI();
+                    }
+                } else if (peer.connectionState === 'failed' || peer.connectionState === 'disconnected') {
+                    showToast('Mất kết nối thoại!');
+                    if (callState !== 'idle') endCall(true);
+                }
+            };
+            peer.oniceconnectionstatechange = () => {
+                if (peer.iceConnectionState === 'failed') { try { peer.restartIce(); } catch (e) {} }
+            };
+            return peer;
+        }
+
+        async function handleIncomingCandidate(candidateData) {
+            if (!pc) return;
+            if (candidateData.from === myOnlineRole) return;
+            try {
+                if (remoteDescSet) await pc.addIceCandidate(new RTCIceCandidate(candidateData.candidate));
+                else iceCandidateBuffer.push(candidateData.candidate);
+            } catch (e) { console.warn('addIceCandidate error:', e); }
+        }
+
+        async function flushIceBuffer() {
+            if (!pc || !remoteDescSet) return;
+            for (const cand of iceCandidateBuffer) {
+                try { await pc.addIceCandidate(new RTCIceCandidate(cand)); } catch (e) {}
+            }
+            iceCandidateBuffer = [];
+        }
+
+        async function startCall() {
+            if (!currentRoomId) { showToast('Hãy vào phòng Online trước!'); return; }
+            if (callState !== 'idle') { showToast('Đang có cuộc gọi khác!'); return; }
+            if (!database) { showToast('Firebase chưa sẵn sàng!'); return; }
+
+            const stream = await getUserMediaSafe();
+            if (!stream) return;
+            localStream = stream;
+            pc = createPeerConnection(currentRoomId);
+            stream.getTracks().forEach(track => pc.addTrack(track, stream));
+
+            callRef = database.ref('chess_calls/' + currentRoomId);
+            await callRef.remove().catch(() => {});
+            callState = 'calling';
+            updateCallUI();
+
+            try {
+                const offer = await pc.createOffer({ offerToReceiveAudio: true });
+                await pc.setLocalDescription(offer);
+                await callRef.set({
+                    caller: myOnlineRole,
+                    callee: myOnlineRole === 'w' ? 'b' : 'w',
+                    offer: { type: offer.type, sdp: offer.sdp },
+                    answer: null, status: 'calling', created: Date.now()
+                });
+                listenToCall();
+                showToast('Đang gọi thoại...');
+            } catch (e) {
+                console.error('createOffer error:', e);
+                showToast('Không thể tạo cuộc gọi!');
+                cleanupCallData();
+                resetCallState();
+            }
+        }
+
+        function listenToCall() {
+            if (!callRef) return;
+            if (callListener) callRef.off('value', callListener);
+            callListener = callRef.on('value', async (snapshot) => {
+                const data = snapshot.val();
+                if (!data) return;
+                if (data.status === 'ended') {
+                    if (callState !== 'idle') { showToast('Cuộc gọi đã kết thúc'); endCall(true); }
+                    return;
+                }
+                if (callState === 'idle' && data.offer && data.caller !== myOnlineRole && !data.answer) {
+                    const age = Date.now() - (data.created || 0);
+                    if (age > 60000) return;
+                    callState = 'ringing';
+                    updateCallUI();
+                    startRingtone();
+                    return;
+                }
+                if (callState === 'calling' && data.answer && data.answer.sdp) {
+                    try {
+                        if (!pc) return;
+                        if (pc.signalingState === 'have-local-offer') {
+                            await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
+                            remoteDescSet = true;
+                            await flushIceBuffer();
+                            stopRingtone();
+                        }
+                    } catch (e) { console.error('setRemoteDescription error:', e); }
+                }
+                if (data.candidates && pc) {
+                    const keys = Object.keys(data.candidates);
+                    for (const k of keys) {
+                        const c = data.candidates[k];
+                        if (c && c.from !== myOnlineRole) await handleIncomingCandidate(c);
+                    }
+                }
+                if (callState === 'calling' && data.status === 'rejected') {
+                    showToast('Đối thủ đã từ chối cuộc gọi');
+                    cleanupCallData();
+                    resetCallState();
+                }
+                if (callState === 'ringing' && (data.status === 'ended' || data.status === 'cancelled')) {
+                    stopRingtone();
+                    resetCallState();
+                }
+            });
+        }
+
+        async function acceptCall() {
+            if (!callRef || callState !== 'ringing') return;
+            stopRingtone();
+            const stream = await getUserMediaSafe();
+            if (!stream) { rejectCall(); return; }
+            localStream = stream;
+            const snapshot = await callRef.once('value');
+            const data = snapshot.val();
+            if (!data || !data.offer) { resetCallState(); return; }
+            pc = createPeerConnection(currentRoomId);
+            stream.getTracks().forEach(track => pc.addTrack(track, stream));
+            try {
+                await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
+                remoteDescSet = true;
+                await flushIceBuffer();
+                const answer = await pc.createAnswer();
+                await pc.setLocalDescription(answer);
+                await callRef.update({
+                    answer: { type: answer.type, sdp: answer.sdp },
+                    status: 'active'
+                });
+                callState = 'active';
+                startCallTimer();
+                updateCallUI();
+                showToast('Đã kết nối cuộc gọi!');
+            } catch (e) {
+                console.error('acceptCall error:', e);
+                showToast('Không thể kết nối cuộc gọi!');
+                cleanupCallData();
+                resetCallState();
+            }
+        }
+
+        function rejectCall() {
+            if (callRef) {
+                callRef.update({ status: 'rejected', endedAt: Date.now() }).catch(() => {});
+                setTimeout(() => cleanupCallData(), 500);
+            }
+            stopRingtone();
+            resetCallState();
+            showToast('Đã từ chối cuộc gọi');
+        }
+
+        function endCall(silent = false) {
+            if (callState === 'idle') return;
+            callState = 'ending';
+            if (callRef) {
+                callRef.update({ status: 'ended', endedAt: Date.now() }).catch(() => {});
+                setTimeout(() => cleanupCallData(), 500);
+            }
+            stopRingtone();
+            resetCallState();
+            if (!silent) showToast('Đã kết thúc cuộc gọi');
+        }
+
+        function cleanupCallData() {
+            if (callRef) { callRef.remove().catch(() => {}); callRef = null; }
+            callListener = null;
+        }
+
+        function toggleMic() {
+            if (!localStream) return;
+            micMuted = !micMuted;
+            localStream.getAudioTracks().forEach(t => { t.enabled = !micMuted; });
+            if (micMuted) {
+                muteMicBtn.classList.add('mic-btn-muted');
+                muteMicIcon.className = 'fa-solid fa-microphone-slash text-base';
+                callPeerStatusEl.innerText = 'Mic đang tắt';
+            } else {
+                muteMicBtn.classList.remove('mic-btn-muted');
+                muteMicIcon.className = 'fa-solid fa-microphone text-base';
+                callPeerStatusEl.innerText = 'Đang kết nối';
+            }
+        }
+
+        document.addEventListener('click', () => {
+            if (remoteAudioEl.srcObject && remoteAudioEl.paused) {
+                remoteAudioEl.play().catch(() => {});
+            }
+        });
+
+        /* ==========================================================
+           RENDER
            ========================================================== */
         const boardEl = document.getElementById('chessboard');
 
@@ -1602,12 +2082,10 @@
                 for (let j = 0; j < 8; j++) {
                     const r = boardFlipped ? 7 - i : i;
                     const c = boardFlipped ? 7 - j : j;
-
                     const square = document.createElement('div');
                     const isDark = (r + c) % 2 === 1;
                     square.className = `relative flex items-center justify-center ${isDark ? 'square-dark' : 'square-light'}`;
-                    square.dataset.row = r;
-                    square.dataset.col = c;
+                    square.dataset.row = r; square.dataset.col = c;
 
                     if (j === 0) {
                         const rankLabel = document.createElement('span');
@@ -1622,14 +2100,8 @@
                         square.appendChild(fileLabel);
                     }
 
-                    if (selectedSquare && selectedSquare.r === r && selectedSquare.c === c) {
-                        square.classList.add('square-selected');
-                    }
-
-                    if (lastMove && ((lastMove.from.r === r && lastMove.from.c === c) || (lastMove.to.r === r && lastMove.to.c === c))) {
-                        square.classList.add('square-prev');
-                    }
-
+                    if (selectedSquare && selectedSquare.r === r && selectedSquare.c === c) square.classList.add('square-selected');
+                    if (lastMove && ((lastMove.from.r === r && lastMove.from.c === c) || (lastMove.to.r === r && lastMove.to.c === c))) square.classList.add('square-prev');
                     const isKingCheckedSquare = checkedKingPos && checkedKingPos.r === r && checkedKingPos.c === c;
                     if (isKingCheckedSquare) square.classList.add('square-check-glow');
 
@@ -1653,7 +2125,6 @@
                     boardEl.appendChild(square);
                 }
             }
-
             updateUI();
         }
 
@@ -1668,8 +2139,7 @@
                 const move = validMoves.find(m => m.r === r && m.c === c);
                 if (move) {
                     executeMove(selectedSquare.r, selectedSquare.c, r, c);
-                    selectedSquare = null;
-                    validMoves = [];
+                    selectedSquare = null; validMoves = [];
                     return;
                 }
             }
@@ -1679,8 +2149,7 @@
                 validMoves = getLegalMoves(r, c);
                 playSoundTone(480, 'sine', 0.05, 0.1);
             } else {
-                selectedSquare = null;
-                validMoves = [];
+                selectedSquare = null; validMoves = [];
             }
             render();
         }
@@ -1693,7 +2162,6 @@
             statusText.innerHTML = isWhiteTurn
                 ? '<span class="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400"></span> Trắng đi'
                 : '<span class="w-2.5 h-2.5 rounded-full bg-amber-400 shadow-sm shadow-amber-400"></span> Đen đi';
-
             if (boardFlipped) {
                 topBadge.innerText = isWhiteTurn ? 'Lượt đi' : 'Chờ';
                 topBadge.className = isWhiteTurn ? 'text-xs px-3 py-1 rounded-full font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 hidden sm:block' : 'text-xs px-3 py-1 rounded-full font-semibold bg-slate-800 text-slate-400 border border-slate-700 hidden sm:block';
@@ -1705,7 +2173,6 @@
                 topBadge.innerText = !isWhiteTurn ? 'Lượt đi' : 'Chờ';
                 topBadge.className = !isWhiteTurn ? 'text-xs px-3 py-1 rounded-full font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 hidden sm:block' : 'text-xs px-3 py-1 rounded-full font-semibold bg-slate-800 text-slate-400 border border-slate-700 hidden sm:block';
             }
-
             const renderCapturedList = (list) => list.map(p => `<span class="inline-block w-5 h-5 drop-shadow-sm">${SVG_PIECES[p]}</span>`).join('');
             document.getElementById('whiteCaptures').innerHTML = renderCapturedList(capturedWhite);
             document.getElementById('blackCaptures').innerHTML = renderCapturedList(capturedBlack);
@@ -1720,13 +2187,11 @@
                     const moveNum = Math.floor(i / 2) + 1;
                     const whiteMove = moveHistory[i];
                     const blackMove = moveHistory[i + 1];
-                    html += `
-                        <tr class="border-b border-slate-800/60 hover:bg-slate-800/40 transition">
-                            <td class="py-1 text-slate-500 w-8 pl-1 font-semibold">${moveNum}.</td>
-                            <td class="py-1 font-bold text-slate-100">${whiteMove ? whiteMove.notation : ''}</td>
-                            <td class="py-1 font-bold text-emerald-400">${blackMove ? blackMove.notation : ''}</td>
-                        </tr>
-                    `;
+                    html += `<tr class="border-b border-slate-800/60 hover:bg-slate-800/40 transition">
+                        <td class="py-1 text-slate-500 w-8 pl-1 font-semibold">${moveNum}.</td>
+                        <td class="py-1 font-bold text-slate-100">${whiteMove ? whiteMove.notation : ''}</td>
+                        <td class="py-1 font-bold text-emerald-400">${blackMove ? blackMove.notation : ''}</td>
+                    </tr>`;
                 }
                 html += '</table>';
                 historyList.innerHTML = html;
@@ -1747,6 +2212,7 @@
             isAnimating = false;
             stopFireworks();
             stopClock();
+            hideAIThinking();
             resetClocks();
             document.getElementById('victoryModal').classList.add('hidden');
             document.getElementById('checkAlertBanner').classList.add('hidden');
@@ -1761,6 +2227,7 @@
             const modeOnlineBtn = document.getElementById('modeOnlineBtn');
             const onlineControls = document.getElementById('onlineControlsBox');
             const activeModeText = document.getElementById('activeModeText');
+            const difficultySelector = document.getElementById('difficultySelector');
 
             const activeClass = 'px-2 py-2 rounded-xl text-xs font-bold border border-emerald-500/80 bg-emerald-500/20 text-emerald-300 flex flex-col items-center justify-center gap-1 transition shadow-sm';
             const inactiveClass = 'px-2 py-2 rounded-xl text-xs font-bold border border-slate-700 bg-slate-800/60 text-slate-400 hover:bg-slate-800 hover:text-slate-200 flex flex-col items-center justify-center gap-1 transition';
@@ -1770,11 +2237,18 @@
             modeOnlineBtn.className = inactiveClass;
             onlineControls.classList.add('hidden');
 
+            // Hiện/ẩn bộ chọn độ khó
+            if (mode === 'ai') difficultySelector.classList.remove('hidden');
+            else difficultySelector.classList.add('hidden');
+
+            if (callState !== 'idle') endCall(true);
+
             if (mode === 'ai') {
                 modeAiBtn.className = activeClass;
                 activeModeText.innerText = "ĐẤU MÁY (AI)";
                 boardFlipped = false;
-                document.getElementById('topPlayerName').innerHTML = 'AI Bot (Đen) <span class="text-[10px] px-1.5 py-0.5 bg-slate-700 rounded text-slate-300 font-mono">1550 ELO</span>';
+                const eloMap = { easy: '800 ELO', medium: '1300 ELO', hard: '1700 ELO', expert: '2200 ELO' };
+                document.getElementById('topPlayerName').innerHTML = `AI Bot (Đen) <span class="text-[10px] px-1.5 py-0.5 bg-slate-700 rounded text-slate-300 font-mono" id="topPlayerSub">${eloMap[currentDifficulty]}</span>`;
                 document.getElementById('topPlayerIcon').className = 'fa-solid fa-robot text-lg text-indigo-400';
                 document.getElementById('bottomPlayerName').innerHTML = 'Bạn (Trắng) <span class="text-[10px] px-1.5 py-0.5 bg-emerald-500/20 text-emerald-300 rounded font-mono">Chủ phòng</span>';
                 resetGameCoreState();
@@ -1796,12 +2270,17 @@
         }
 
         /* ==========================================================
-           8. KHỞI TẠO
+           INIT
            ========================================================== */
         function initControls() {
             document.getElementById('modeAiBtn').addEventListener('click', () => setMode('ai'));
             document.getElementById('modePassBtn').addEventListener('click', () => setMode('pass'));
             document.getElementById('modeOnlineBtn').addEventListener('click', () => setMode('online'));
+
+            document.getElementById('diffEasyBtn').addEventListener('click', () => setAIDifficulty('easy'));
+            document.getElementById('diffMediumBtn').addEventListener('click', () => setAIDifficulty('medium'));
+            document.getElementById('diffHardBtn').addEventListener('click', () => setAIDifficulty('hard'));
+            document.getElementById('diffExpertBtn').addEventListener('click', () => setAIDifficulty('expert'));
 
             document.getElementById('createRoomBtn').addEventListener('click', createOnlineRoom);
             document.getElementById('joinRoomBtn').addEventListener('click', () => {
@@ -1855,11 +2334,12 @@
                 if (isGameOver) return;
                 isGameOver = true;
                 stopClock();
+                hideAIThinking();
                 const winner = turn === 'w' ? 'Bên Đen' : 'Bên Trắng';
                 if (gameMode === 'online' && roomFirebaseRef) {
                     roomFirebaseRef.update({ resignedBy: myOnlineRole });
                 }
-                showVictoryCelebration(`${winner} Thắng Cuộc!`, `Một bên đã xin đầu hàng. Ván đấu kết thúc!`, true);
+                showVictoryCelebration(`${winner} Thắng Cuộc!`, `Một bên đã xin đầu hàng.`, true);
             });
 
             document.getElementById('flipBtn').addEventListener('click', () => {
@@ -1882,8 +2362,7 @@
                     }
                     turn = last.color;
                 }
-                selectedSquare = null;
-                validMoves = [];
+                selectedSquare = null; validMoves = [];
                 render();
                 playSoundTone(300, 'sine', 0.1);
             });
@@ -1895,7 +2374,23 @@
                 if (soundEnabled) soundIcon.className = 'fa-solid fa-volume-high text-base text-emerald-400';
                 else soundIcon.className = 'fa-solid fa-volume-xmark text-base text-slate-500';
             });
+
+            callBtn.addEventListener('click', () => {
+                if (gameMode !== 'online') { showToast('Chỉ gọi được khi ở chế độ Online!'); return; }
+                if (!currentRoomId) { showToast('Hãy vào phòng Online trước!'); return; }
+                startCall();
+            });
+            acceptCallBtn.addEventListener('click', acceptCall);
+            rejectCallBtn.addEventListener('click', rejectCall);
+            endCallBtn.addEventListener('click', () => endCall(false));
+            muteMicBtn.addEventListener('click', toggleMic);
         }
+
+        window.addEventListener('beforeunload', () => {
+            if (callState !== 'idle') {
+                if (callRef) callRef.update({ status: 'ended', endedAt: Date.now() }).catch(() => {});
+            }
+        });
 
         window.addEventListener('DOMContentLoaded', () => {
             initControls();
